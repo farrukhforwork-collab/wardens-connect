@@ -117,8 +117,52 @@ const Profile = () => {
         {posts.length ? (
           posts.map((post) => (
             <article key={post._id} className="brand-card rounded-2xl p-5">
-              <p className="text-xs text-slate-400">{post.category}</p>
-              <p className="mt-2 text-sm text-slate-700">{post.text}</p>
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-slate-400">
+                    {post.category}
+                  </p>
+                  <p className="text-[11px] text-slate-500">
+                    {new Date(post.createdAt).toLocaleString('en-GB', {
+                      dateStyle: 'medium',
+                      timeStyle: 'short'
+                    })}
+                  </p>
+                </div>
+                {post.isOfficialNotice ? (
+                  <span className="brand-pill rounded-full px-2 py-1 text-xs">Official</span>
+                ) : null}
+              </div>
+              <p className="mt-3 text-sm text-slate-700">{post.text}</p>
+              {post.media?.length ? (
+                <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                  {post.media.slice(0, 3).map((item) => (
+                    <div
+                      key={item.url}
+                      className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50"
+                    >
+                      {item.type === 'image' ? (
+                        <img
+                          src={item.url}
+                          alt={item.name || 'Media'}
+                          className="h-40 w-full object-cover"
+                        />
+                      ) : item.type === 'video' ? (
+                        <video src={item.url} controls className="h-40 w-full object-cover" />
+                      ) : (
+                        <a
+                          href={item.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex h-40 items-center justify-center text-xs text-slate-600"
+                        >
+                          View document
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : null}
             </article>
           ))
         ) : (
