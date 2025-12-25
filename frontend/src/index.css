@@ -4,6 +4,12 @@
 
 :root {
   color-scheme: light;
+  --brand-ink: #0f172a;
+  --brand-slate: #1f2937;
+  --brand-ember: #f97316;
+  --brand-sun: #fb923c;
+  --brand-glow: rgba(249, 115, 22, 0.2);
+  --brand-mist: rgba(15, 23, 42, 0.08);
 }
 
 .dark {
@@ -12,6 +18,9 @@
 
 body {
   font-family: theme('fontFamily.body');
+  background: radial-gradient(circle at 20% 20%, rgba(249, 115, 22, 0.08), transparent 40%),
+    radial-gradient(circle at 80% 10%, rgba(15, 23, 42, 0.06), transparent 45%),
+    #f8fafc;
 }
 
 .glass {
@@ -21,4 +30,66 @@ body {
 
 .dark .glass {
   background: rgba(15, 23, 42, 0.7);
+}
+
+.brand-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.9));
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  box-shadow: 0 24px 50px var(--brand-mist);
+  backdrop-filter: blur(18px);
+}
+
+.dark .brand-card {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.9));
+  border-color: rgba(51, 65, 85, 0.6);
+}
+
+.brand-button {
+  background: linear-gradient(135deg, var(--brand-ember), var(--brand-sun));
+  box-shadow: 0 10px 24px var(--brand-glow);
+}
+
+.brand-button:active {
+  transform: translateY(1px);
+}
+
+.brand-pill {
+  background: rgba(249, 115, 22, 0.12);
+  color: var(--brand-ember);
+  border: 1px solid rgba(249, 115, 22, 0.35);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-rise {
+  animation: rise 0.6s ease-out both;
+}
+
+.delay-150 {
+  animation-delay: 150ms;
+}
+
+.animate-stagger > * {
+  animation: rise 0.6s ease-out both;
+}
+
+.animate-stagger > *:nth-child(2) {
+  animation-delay: 80ms;
+}
+
+.animate-stagger > *:nth-child(3) {
+  animation-delay: 140ms;
+}
+
+.animate-stagger > *:nth-child(4) {
+  animation-delay: 200ms;
 }

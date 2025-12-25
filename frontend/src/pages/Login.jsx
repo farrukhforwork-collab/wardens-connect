@@ -60,7 +60,7 @@ const Login = () => {
           Service ID + CNIC
         </button>
       </div>
-      <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
+      <form className="mt-6 space-y-4 animate-rise" onSubmit={handleSubmit}>
         {mode === 'email' ? (
           <div>
             <label className="text-xs uppercase tracking-widest text-slate-400">Official Email</label>
@@ -98,12 +98,15 @@ const Login = () => {
           </>
         )}
         {error ? <p className="text-sm text-red-500">{error}</p> : null}
-        <button className="w-full rounded-2xl bg-accent-500 px-4 py-3 text-sm font-semibold text-white">
+        <button className="brand-button w-full rounded-2xl px-4 py-3 text-sm font-semibold text-white">
           Continue
         </button>
         <div className="flex items-center justify-between text-xs text-slate-500">
           <span>Accounts require admin approval.</span>
-          <Link to="/request-access" className="font-semibold text-accent-600">
+          <Link
+            to="/request-access"
+            className="brand-pill rounded-full px-3 py-1 font-semibold"
+          >
             Create account (invite only)
           </Link>
         </div>

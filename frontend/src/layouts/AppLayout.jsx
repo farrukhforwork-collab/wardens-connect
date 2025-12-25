@@ -17,7 +17,9 @@ const AppLayout = ({ children }) => {
   const { theme, setTheme } = useTheme();
   const [welfare, setWelfare] = useState({ balance: 0, totalIncome: 0, totalExpense: 0 });
   const [monthFilter, setMonthFilter] = useState('');
-  const [notice, setNotice] = useState(null);
+  const [notices, setNotices] = useState([]);
+  const [noticeMonth, setNoticeMonth] = useState('');
+  const [noticeSort, setNoticeSort] = useState('newest');
   const [profileOpen, setProfileOpen] = useState(false);
   const [profileForm, setProfileForm] = useState({
     fullName: '',
@@ -28,6 +30,8 @@ const AppLayout = ({ children }) => {
   });
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
+  const isAdmin =
+    user?.isSuperAdmin || user?.role?.name === 'Admin' || user?.role?.name === 'Super Admin';
 
   const initials = useMemo(() => {
     if (!user?.fullName) return 'WC';
@@ -55,24 +59,48 @@ const AppLayout = ({ children }) => {
   useEffect(() => {
     const loadSidebar = async () => {
       try {
-        const [welfareRes, noticeRes] = await Promise.all([
-          api.get('/welfare/dashboard', {
-            params: monthFilter ? { month: monthFilter } : undefined
-          }),
-          api.get('/posts', { params: { official: true, limit: 1 } })
-        ]);
+        const welfareRes = await api.get('/welfare/dashboard', {
+          params: monthFilter ? { month: monthFilter } : undefined
+        });
         setWelfare({
           balance: welfareRes.data.balance || 0,
           totalIncome: welfareRes.data.totalIncome || 0,
           totalExpense: welfareRes.data.totalExpense || 0
         });
-        setNotice(noticeRes.data.posts?.[0] || null);
       } catch (error) {
         // ignore sidebar load failures
       }
     };
     loadSidebar();
   }, [monthFilter]);
+
+  useEffect(() => {
+    const loadNotices = async () => {
+      try {
+        const res = await api.get('/posts', { params: { official: true, limit: 50 } });
+        setNotices(res.data.posts || []);
+      } catch (error) {
+        // ignore
+      }
+    };
+    loadNotices();
+  }, []);
+
+  const filteredNotices = useMemo(() => {
+    const list = notices.filter((notice) => {
+      if (!noticeMonth) return true;
+      const date = new Date(notice.createdAt);
+      const monthValue = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(
+        2,
+        '0'
+      )}`;
+      return monthValue === noticeMonth;
+    });
+    return list.sort((a, b) => {
+      const diff = new Date(a.createdAt) - new Date(b.createdAt);
+      return noticeSort === 'newest' ? -diff : diff;
+    });
+  }, [notices, noticeMonth, noticeSort]);
 
   const handleAvatarUpload = async (file) => {
     if (!file) return;
@@ -98,12 +126,12 @@ const AppLayout = ({ children }) => {
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-950">
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90">
-        <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-3 sm:flex-nowrap">
           <Link to="/" className="flex items-center gap-3">
             <img src="/wc-logo.svg" alt="Wardens Connect" className="h-10 w-10" />
             <div>
-              <p className="font-display text-lg leading-none">Wardens Connect</p>
-              <p className="text-[11px] uppercase tracking-[0.3em] text-slate-400">
+              <p className="font-display text-base leading-none sm:text-lg">Wardens Connect</p>
+              <p className="hidden text-[11px] uppercase tracking-[0.3em] text-slate-400 sm:block">
                 Private Network
               </p>
             </div>
@@ -121,7 +149,7 @@ const AppLayout = ({ children }) => {
               {theme === 'dark' ? 'Light' : 'Dark'}
             </button>
             <button
-              className="rounded-full bg-accent-500 px-3 py-1 text-sm font-medium text-white"
+              className="brand-button rounded-full px-3 py-1 text-sm font-medium text-white"
               onClick={logout}
             >
               Sign out
@@ -132,7 +160,7 @@ const AppLayout = ({ children }) => {
 
       <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 lg:grid-cols-[260px_1fr_320px]">
         <aside className="hidden lg:block">
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+          <div className="brand-card rounded-2xl p-4">
             <div className="flex items-center gap-3">
               {user?.avatarUrl ? (
                 <img
@@ -151,12 +179,12 @@ const AppLayout = ({ children }) => {
               </div>
             </div>
             <div className="mt-4 space-y-1 text-xs text-slate-500">
-              <p>Station: {user?.station || 'HQ'}</p>
+              <p>Sector/Office: {user?.station || 'HQ'}</p>
               <p>City: {user?.city || 'Punjab'}</p>
             </div>
           </div>
 
-          <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+          <div className="brand-card mt-4 rounded-2xl p-4">
             <p className="text-xs uppercase tracking-widest text-slate-400">Navigation</p>
             <nav className="mt-4 flex flex-col gap-2">
               {navItems.map((item) => (
@@ -181,7 +209,7 @@ const AppLayout = ({ children }) => {
         <main className="min-h-[70vh] space-y-6">{children}</main>
 
         <aside className="hidden lg:block">
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+          <div className="brand-card rounded-2xl p-4">
             <div className="flex items-center justify-between">
               <p className="text-xs uppercase tracking-widest text-slate-400">Welfare Summary</p>
               <select
@@ -211,30 +239,152 @@ const AppLayout = ({ children }) => {
             <div className="mt-4 space-y-2">
               <p className="text-sm">Balance: PKR {welfare.balance}</p>
               <p className="text-xs text-slate-500">Monthly Income: PKR {welfare.totalIncome}</p>
-              <p className="text-xs text-slate-500">Monthly Expenses: PKR {welfare.totalExpense}</p>
+              <p className="text-xs text-slate-500">
+                Monthly Expenses: PKR {welfare.totalExpense}
+              </p>
             </div>
           </div>
-          <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-soft dark:border-slate-800 dark:bg-slate-900">
-            <p className="text-xs uppercase tracking-widest text-slate-400">Official Notice</p>
-            {notice ? (
-              <div className="mt-3 text-sm text-slate-600 dark:text-slate-300">
-                <p className="font-semibold">{notice.author?.fullName}</p>
-                <p className="text-xs text-slate-400">
-                  {notice.category} •{' '}
-                  {new Date(notice.createdAt).toLocaleString('en-GB', {
-                    dateStyle: 'medium',
-                    timeStyle: 'short'
+          <div className="brand-card mt-4 rounded-2xl p-4">
+            <div className="flex items-center justify-between">
+              <p className="text-xs uppercase tracking-widest text-slate-400">Official Notices</p>
+              <div className="flex items-center gap-2">
+                <select
+                  value={noticeMonth}
+                  onChange={(e) => setNoticeMonth(e.target.value)}
+                  className="rounded-full border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-600 dark:border-slate-800 dark:bg-slate-900"
+                >
+                  <option value="">All</option>
+                  {Array.from({ length: 6 }).map((_, index) => {
+                    const date = new Date();
+                    date.setUTCMonth(date.getUTCMonth() - index);
+                    const monthValue = `${date.getUTCFullYear()}-${String(
+                      date.getUTCMonth() + 1
+                    ).padStart(2, '0')}`;
+                    const label = date.toLocaleString('en-US', {
+                      month: 'short',
+                      year: 'numeric'
+                    });
+                    return (
+                      <option key={monthValue} value={monthValue}>
+                        {label}
+                      </option>
+                    );
                   })}
-                </p>
-                <p className="mt-2">{notice.text}</p>
+                </select>
+                <select
+                  value={noticeSort}
+                  onChange={(e) => setNoticeSort(e.target.value)}
+                  className="rounded-full border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-600 dark:border-slate-800 dark:bg-slate-900"
+                >
+                  <option value="newest">Newest</option>
+                  <option value="oldest">Oldest</option>
+                </select>
               </div>
+            </div>
+            <div className="mt-4 space-y-3">
+              {filteredNotices.length ? (
+                filteredNotices.slice(0, 5).map((notice) => (
+                  <div key={notice._id} className="rounded-2xl bg-slate-50 p-3 text-xs">
+                    <p className="font-semibold text-slate-700">
+                      {notice.author?.fullName || 'Official'}
+                    </p>
+                    <p className="text-[11px] text-slate-400">
+                      {new Date(notice.createdAt).toLocaleString('en-GB', {
+                        dateStyle: 'medium',
+                        timeStyle: 'short'
+                      })}
+                    </p>
+                    <p className="mt-2 text-slate-600">{notice.text}</p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-slate-600">
+                  No official notices yet. Urdu: ???? ???? ?????? ???? ???? ???? ????
+                </p>
+              )}
+            </div>
+            <div className="mt-3 text-right">
+              <Link to="/" className="text-xs font-semibold text-accent-600">
+                View all
+              </Link>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <div className="mx-auto mt-2 space-y-4 px-4 pb-24 lg:hidden">
+        <div className="brand-card rounded-2xl p-4">
+          <p className="text-xs uppercase tracking-widest text-slate-400">Welfare Summary</p>
+          <div className="mt-3 grid gap-2 text-sm">
+            <p>Balance: PKR {welfare.balance}</p>
+            <p className="text-xs text-slate-500">Monthly Income: PKR {welfare.totalIncome}</p>
+            <p className="text-xs text-slate-500">Monthly Expenses: PKR {welfare.totalExpense}</p>
+          </div>
+        </div>
+        <div className="brand-card rounded-2xl p-4">
+          <div className="flex items-center justify-between">
+            <p className="text-xs uppercase tracking-widest text-slate-400">Official Notices</p>
+            <select
+              value={noticeMonth}
+              onChange={(e) => setNoticeMonth(e.target.value)}
+              className="rounded-full border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-600"
+            >
+              <option value="">All</option>
+              {Array.from({ length: 6 }).map((_, index) => {
+                const date = new Date();
+                date.setUTCMonth(date.getUTCMonth() - index);
+                const monthValue = `${date.getUTCFullYear()}-${String(
+                  date.getUTCMonth() + 1
+                ).padStart(2, '0')}`;
+                const label = date.toLocaleString('en-US', {
+                  month: 'short',
+                  year: 'numeric'
+                });
+                return (
+                  <option key={monthValue} value={monthValue}>
+                    {label}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+          <div className="mt-3 space-y-3">
+            {filteredNotices.length ? (
+              filteredNotices.slice(0, 3).map((notice) => (
+                <div key={notice._id} className="rounded-2xl bg-slate-50 p-3 text-xs">
+                  <p className="font-semibold text-slate-700">
+                    {notice.author?.fullName || 'Official'}
+                  </p>
+                  <p className="text-[11px] text-slate-400">
+                    {new Date(notice.createdAt).toLocaleString('en-GB', {
+                      dateStyle: 'medium',
+                      timeStyle: 'short'
+                    })}
+                  </p>
+                  <p className="mt-2 text-slate-600">{notice.text}</p>
+                </div>
+              ))
             ) : (
-              <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">
-                No official notices yet. Urdu: ???? ???? ?????? ???? ???? ???? ????
+              <p className="text-sm text-slate-600">
+                No official notices yet. Urdu: ابھی کوئی سرکاری نوٹس جاری نہیں ہوا۔
               </p>
             )}
           </div>
-        </aside>
+        </div>
+      </div>
+
+      <div className="fixed bottom-16 left-0 right-0 z-40 mx-auto flex max-w-sm items-center justify-between rounded-full border border-slate-200 bg-white px-4 py-2 text-xs shadow-soft lg:hidden">
+        <Link to="/#create-post" className="brand-button rounded-full px-4 py-2 text-white">
+          New post
+        </Link>
+        <Link to="/welfare" className="rounded-full border border-slate-200 px-4 py-2">
+          Welfare
+        </Link>
+        {isAdmin ? (
+          <Link to="/#create-post" className="rounded-full border border-slate-200 px-3 py-2">
+            Notice
+          </Link>
+        ) : null}
       </div>
 
       <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white/95 px-4 py-2 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95 lg:hidden">
@@ -279,7 +429,7 @@ const AppLayout = ({ children }) => {
                 value={profileForm.station}
                 onChange={(e) => setProfileForm({ ...profileForm, station: e.target.value })}
                 className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm"
-                placeholder="Station"
+                placeholder="Sector/Office"
               />
               <input
                 value={profileForm.city}

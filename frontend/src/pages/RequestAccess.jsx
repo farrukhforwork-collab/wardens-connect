@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../services/api.js';
+
+const ranks = ['C', 'HC', 'ASI', 'TW', 'LTW', 'STW', 'TRC', 'DSP'];
 
 const RequestAccess = () => {
   const [form, setForm] = useState({
     fullName: '',
     email: '',
+    rank: 'TW',
     serviceId: '',
     cnic: '',
     station: '',
@@ -32,7 +36,17 @@ const RequestAccess = () => {
         Invite-only system. Submit your details for admin approval.
       </p>
       {error ? <p className="mt-4 text-sm text-red-500">{error}</p> : null}
-      {success ? <p className="mt-4 text-sm text-green-600">{success}</p> : null}
+      {success ? (
+        <div className="mt-4 space-y-4">
+          <p className="text-sm text-green-600">{success}</p>
+          <Link
+            to="/"
+            className="inline-flex items-center rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600"
+          >
+            Back to home
+          </Link>
+        </div>
+      ) : null}
       {!success ? (
         <form onSubmit={submit} className="mt-6 grid gap-3 md:grid-cols-2">
           <input
@@ -50,13 +64,26 @@ const RequestAccess = () => {
             type="email"
             required
           />
-          <input
-            value={form.serviceId}
-            onChange={(e) => setForm({ ...form, serviceId: e.target.value })}
-            className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm"
-            placeholder="Service ID"
-            required
-          />
+          <div className="flex gap-2">
+            <select
+              value={form.rank}
+              onChange={(e) => setForm({ ...form, rank: e.target.value })}
+              className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm"
+            >
+              {ranks.map((rank) => (
+                <option key={rank} value={rank}>
+                  {rank}
+                </option>
+              ))}
+            </select>
+            <input
+              value={form.serviceId}
+              onChange={(e) => setForm({ ...form, serviceId: e.target.value })}
+              className="flex-1 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm"
+              placeholder="Service ID"
+              required
+            />
+          </div>
           <input
             value={form.cnic}
             onChange={(e) => setForm({ ...form, cnic: e.target.value })}

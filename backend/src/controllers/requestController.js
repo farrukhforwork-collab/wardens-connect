@@ -4,7 +4,7 @@ const { hashSensitive } = require('../utils/crypto');
 
 const requestAccess = async (req, res, next) => {
   try {
-    const { fullName, email, serviceId, cnic, station, city, phone } = req.body;
+    const { fullName, email, serviceId, rank, cnic, station, city, phone } = req.body;
 
     if (!fullName || !email || !serviceId || !cnic) {
       return res.status(400).json({
@@ -29,6 +29,7 @@ const requestAccess = async (req, res, next) => {
       fullName,
       email: email.toLowerCase(),
       serviceId,
+      rank,
       cnicHash,
       cnicLast4,
       role: role.id,

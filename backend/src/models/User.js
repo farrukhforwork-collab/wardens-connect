@@ -5,6 +5,7 @@ const userSchema = new mongoose.Schema(
     fullName: { type: String, required: true, trim: true },
     email: { type: String, lowercase: true, trim: true },
     serviceId: { type: String, trim: true },
+    rank: { type: String, trim: true },
     cnicHash: { type: String },
     cnicLast4: { type: String },
     role: { type: mongoose.Schema.Types.ObjectId, ref: 'Role', required: true },
