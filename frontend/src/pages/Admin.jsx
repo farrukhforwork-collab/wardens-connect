@@ -37,6 +37,7 @@ const Admin = () => {
   });
   const [superAdminError, setSuperAdminError] = useState('');
   const [superAdminSuccess, setSuperAdminSuccess] = useState('');
+  const [hideSuperAdminForm, setHideSuperAdminForm] = useState(false);
 
   const loadData = async () => {
     const [pendingRes, reportsRes] = await Promise.all([
@@ -114,6 +115,7 @@ const Admin = () => {
         blockUserId: ''
       });
       setSuperAdminSuccess('Super admin created.');
+      setHideSuperAdminForm(true);
       loadData();
     } catch (err) {
       setSuperAdminError(err?.response?.data?.message || 'Failed to create super admin');
@@ -152,71 +154,73 @@ const Admin = () => {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
-        <h2 className="font-display text-lg">Create New Super Admin</h2>
-        <form onSubmit={createSuperAdmin} className="mt-4 grid gap-3 md:grid-cols-3">
-          <input
-            value={superAdminForm.fullName}
-            onChange={(e) =>
-              setSuperAdminForm({ ...superAdminForm, fullName: e.target.value })
-            }
-            className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950"
-            placeholder="Full name"
-            required
-          />
-          <input
-            value={superAdminForm.email}
-            onChange={(e) =>
-              setSuperAdminForm({ ...superAdminForm, email: e.target.value })
-            }
-            className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950"
-            placeholder="Official email"
-            type="email"
-            required
-          />
-          <input
-            value={superAdminForm.password}
-            onChange={(e) =>
-              setSuperAdminForm({ ...superAdminForm, password: e.target.value })
-            }
-            className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950"
-            placeholder="Password (min 8)"
-            type="password"
-            required
-          />
-          <input
-            value={superAdminForm.serviceId}
-            onChange={(e) =>
-              setSuperAdminForm({ ...superAdminForm, serviceId: e.target.value })
-            }
-            className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950"
-            placeholder="Service ID (optional)"
-          />
-          <select
-            value={superAdminForm.blockUserId}
-            onChange={(e) =>
-              setSuperAdminForm({ ...superAdminForm, blockUserId: e.target.value })
-            }
-            className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-900 md:col-span-2"
-          >
-            <option value="">Do not block old super admin</option>
-            {superAdmins.map((admin) => (
-              <option key={admin._id} value={admin._id}>
-                {admin.fullName} ({admin.email || admin.serviceId || 'No email'})
-              </option>
-            ))}
-          </select>
-          <button className="rounded-full bg-accent-500 px-4 py-2 text-sm font-semibold text-white md:col-span-3">
-            Create Super Admin
-          </button>
-        </form>
-        {superAdminError ? (
-          <p className="mt-3 text-xs text-red-500">{superAdminError}</p>
-        ) : null}
-        {superAdminSuccess ? (
-          <p className="mt-3 text-xs text-green-600">{superAdminSuccess}</p>
-        ) : null}
-      </section>
+      {!hideSuperAdminForm ? (
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+          <h2 className="font-display text-lg">Create New Super Admin</h2>
+          <form onSubmit={createSuperAdmin} className="mt-4 grid gap-3 md:grid-cols-3">
+            <input
+              value={superAdminForm.fullName}
+              onChange={(e) =>
+                setSuperAdminForm({ ...superAdminForm, fullName: e.target.value })
+              }
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950"
+              placeholder="Full name"
+              required
+            />
+            <input
+              value={superAdminForm.email}
+              onChange={(e) =>
+                setSuperAdminForm({ ...superAdminForm, email: e.target.value })
+              }
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950"
+              placeholder="Official email"
+              type="email"
+              required
+            />
+            <input
+              value={superAdminForm.password}
+              onChange={(e) =>
+                setSuperAdminForm({ ...superAdminForm, password: e.target.value })
+              }
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950"
+              placeholder="Password (min 8)"
+              type="password"
+              required
+            />
+            <input
+              value={superAdminForm.serviceId}
+              onChange={(e) =>
+                setSuperAdminForm({ ...superAdminForm, serviceId: e.target.value })
+              }
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950"
+              placeholder="Service ID (optional)"
+            />
+            <select
+              value={superAdminForm.blockUserId}
+              onChange={(e) =>
+                setSuperAdminForm({ ...superAdminForm, blockUserId: e.target.value })
+              }
+              className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-900 md:col-span-2"
+            >
+              <option value="">Do not block old super admin</option>
+              {superAdmins.map((admin) => (
+                <option key={admin._id} value={admin._id}>
+                  {admin.fullName} ({admin.email || admin.serviceId || 'No email'})
+                </option>
+              ))}
+            </select>
+            <button className="rounded-full bg-accent-500 px-4 py-2 text-sm font-semibold text-white md:col-span-3">
+              Create Super Admin
+            </button>
+          </form>
+          {superAdminError ? (
+            <p className="mt-3 text-xs text-red-500">{superAdminError}</p>
+          ) : null}
+          {superAdminSuccess ? (
+            <p className="mt-3 text-xs text-green-600">{superAdminSuccess}</p>
+          ) : null}
+        </section>
+      ) : null}
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
         <h2 className="font-display text-lg">Create User (Invite)</h2>
@@ -377,8 +381,9 @@ const Admin = () => {
               <div>
                 <p className="font-semibold">{user.fullName}</p>
                 <p className="text-xs text-slate-500">
-                  {user.serviceId} | {user.city}
+                  {user.serviceId} | {user.station || 'Sector/Office'} | {user.city || 'City'}
                 </p>
+                <p className="text-xs text-slate-400">{user.phone || 'No phone'}</p>
               </div>
               <div className="flex items-center gap-2">
                 <select
