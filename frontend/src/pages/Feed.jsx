@@ -125,6 +125,13 @@ const Feed = () => {
                 )}
                 <div>
                   <p className="text-sm font-semibold">{post.author?.fullName}</p>
+                  <p className="text-xs text-slate-400">
+                    {(post.author?.rank || post.author?.role?.name || 'Warden') +
+                      ' • ' +
+                      (post.author?.station || 'HQ') +
+                      ' • ' +
+                      (post.author?.city || 'Punjab')}
+                  </p>
                   <p className="text-xs text-slate-500">{post.category}</p>
                 </div>
               </div>

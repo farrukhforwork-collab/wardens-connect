@@ -30,8 +30,7 @@ const AppLayout = ({ children }) => {
   });
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
-  const isAdmin =
-    user?.isSuperAdmin || user?.role?.name === 'Admin' || user?.role?.name === 'Super Admin';
+  const isAdmin =\n    user?.isSuperAdmin || user?.role?.name === 'Admin' || user?.role?.name === 'Super Admin';\n  const visibleNavItems = isAdmin\n    ? navItems\n    : navItems.filter((item) => item.to !== '/admin');
 
   const initials = useMemo(() => {
     if (!user?.fullName) return 'WC';
@@ -187,7 +186,7 @@ const AppLayout = ({ children }) => {
           <div className="brand-card mt-4 rounded-2xl p-4">
             <p className="text-xs uppercase tracking-widest text-slate-400">Navigation</p>
             <nav className="mt-4 flex flex-col gap-2">
-              {navItems.map((item) => (
+              {visibleNavItems.map((item) => (
                 <NavLink
                   key={item.to}
                   to={item.to}
@@ -299,7 +298,7 @@ const AppLayout = ({ children }) => {
                 ))
               ) : (
                 <p className="text-sm text-slate-600">
-                  No official notices yet. Urdu: ???? ???? ?????? ???? ???? ???? ????
+                  No official notices yet.
                 </p>
               )}
             </div>
@@ -366,7 +365,7 @@ const AppLayout = ({ children }) => {
               ))
             ) : (
               <p className="text-sm text-slate-600">
-                No official notices yet. Urdu: ابھی کوئی سرکاری نوٹس جاری نہیں ہوا۔
+                No official notices yet.
               </p>
             )}
           </div>
@@ -389,7 +388,7 @@ const AppLayout = ({ children }) => {
 
       <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white/95 px-4 py-2 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95 lg:hidden">
         <div className="flex items-center justify-around text-xs">
-          {navItems.map((item) => (
+          {visibleNavItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
@@ -479,3 +478,4 @@ const AppLayout = ({ children }) => {
 };
 
 export default AppLayout;
+
