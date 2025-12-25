@@ -199,7 +199,7 @@ const AppLayout = ({ children }) => {
             {installPrompt ? (
               <button
                 onClick={handleInstall}
-                className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700"
+                className="hidden rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700 sm:inline-flex"
               >
                 Install
               </button>
@@ -256,6 +256,22 @@ const AppLayout = ({ children }) => {
               aria-label="Toggle theme"
             >
               {theme === 'dark' ? 'L' : 'D'}
+            </button>
+            {installPrompt ? (
+              <button
+                onClick={handleInstall}
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-[10px] font-semibold text-amber-700 sm:hidden"
+                aria-label="Install app"
+              >
+                +
+              </button>
+            ) : null}
+            <button
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-[10px] font-semibold text-slate-600 sm:hidden"
+              onClick={logout}
+              aria-label="Sign out"
+            >
+              OUT
             </button>
             <button
               className="brand-button hidden rounded-full px-3 py-1 text-sm font-medium text-white sm:inline-flex"
