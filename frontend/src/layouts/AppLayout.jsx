@@ -22,6 +22,7 @@ const AppLayout = ({ children }) => {
   const [noticeMonth, setNoticeMonth] = useState('');
   const [noticeSort, setNoticeSort] = useState('newest');
   const [profileOpen, setProfileOpen] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState(null);
   const [profileForm, setProfileForm] = useState({
     fullName: '',
     station: '',
@@ -59,6 +60,15 @@ const AppLayout = ({ children }) => {
     const missingProfile = !user.avatarUrl || !user.station || !user.city || !user.phone;
     setProfileOpen(missingProfile);
   }, [user]);
+
+  useEffect(() => {
+    const handleBeforeInstall = (event) => {
+      event.preventDefault();
+      setInstallPrompt(event);
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+  }, []);
 
   useEffect(() => {
     const loadSidebar = async () => {
@@ -127,10 +137,17 @@ const AppLayout = ({ children }) => {
     setProfileOpen(false);
   };
 
+  const handleInstall = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    await installPrompt.userChoice;
+    setInstallPrompt(null);
+  };
+
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-950">
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95">
-        <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2">
+        <div className="mx-auto flex max-w-7xl items-center gap-3 px-3 py-2 sm:px-4">
           <Link to="/" className="flex items-center gap-2">
             <img src="/wc-logo.svg" alt="Wardens Connect" className="h-9 w-9" />
             <div className="hidden sm:block">
@@ -140,11 +157,19 @@ const AppLayout = ({ children }) => {
             </div>
           </Link>
           <div className="hidden flex-1 lg:block">
-            <div className="flex items-center rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-500">
+            <div className="flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-2 sm:px-4 text-sm text-slate-500">
               Search wardens, posts, pages
             </div>
           </div>
           <div className="ml-auto flex items-center gap-2">
+            {installPrompt ? (
+              <button
+                onClick={handleInstall}
+                className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700"
+              >
+                Install
+              </button>
+            ) : null}
             <button
               className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200"
               aria-label="Search"
@@ -183,7 +208,20 @@ const AppLayout = ({ children }) => {
         </div>
       </header>
 
-      <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 lg:grid-cols-[260px_1fr_320px]">
+      <div className="mx-auto w-full max-w-7xl px-3 pt-4 sm:hidden">
+        <div className="brand-card rounded-2xl p-3">
+          <div className="flex items-center gap-3">
+            <div className="flex-1 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs text-slate-500">
+              Search wardens, posts, pages
+            </div>
+            <Link to="/#create-post" className="brand-button rounded-full px-3 py-2 text-xs text-white">
+              Post
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      <div className="mx-auto grid max-w-7xl gap-4 px-3 py-5 sm:gap-6 sm:px-4 lg:grid-cols-[260px_1fr_320px]">
         <aside className="hidden lg:block">
           <div className="brand-card rounded-2xl p-4">
             <div className="flex items-center gap-3">
@@ -388,11 +426,11 @@ const AppLayout = ({ children }) => {
         </div>
       </div>
 
-      <div className="fixed bottom-16 left-0 right-0 z-40 mx-auto flex max-w-sm items-center justify-between rounded-full border border-slate-200 bg-white px-4 py-2 text-xs shadow-soft lg:hidden">
-        <Link to="/#create-post" className="brand-button rounded-full px-4 py-2 text-white">
+      <div className="fixed bottom-16 left-0 right-0 z-40 mx-auto flex max-w-sm items-center justify-between rounded-full border border-slate-200 bg-white px-3 py-2 sm:px-4 text-xs shadow-soft lg:hidden">
+        <Link to="/#create-post" className="brand-button rounded-full px-3 py-2 sm:px-4 text-white">
           New post
         </Link>
-        <Link to="/welfare" className="rounded-full border border-slate-200 px-4 py-2">
+        <Link to="/welfare" className="rounded-full border border-slate-200 px-3 py-2 sm:px-4">
           Welfare
         </Link>
         {isAdmin ? (
@@ -402,7 +440,7 @@ const AppLayout = ({ children }) => {
         ) : null}
       </div>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white/95 px-4 py-2 backdrop-blur lg:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white/95 px-3 py-2 sm:px-4 backdrop-blur lg:hidden">
         <div className="flex items-center justify-around text-xs">
           {visibleNavItems.map((item) => (
             <NavLink
@@ -463,7 +501,7 @@ const AppLayout = ({ children }) => {
                   {initials}
                 </div>
               )}
-              <label className="rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600">
+              <label className="rounded-full border border-slate-200 px-3 py-2 sm:px-4 text-xs font-semibold text-slate-600">
                 {uploading ? 'Uploading...' : 'Upload Photo'}
                 <input
                   type="file"
@@ -492,5 +530,10 @@ const AppLayout = ({ children }) => {
 };
 
 export default AppLayout;
+
+
+
+
+
 
 

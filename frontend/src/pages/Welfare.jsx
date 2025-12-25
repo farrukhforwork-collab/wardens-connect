@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import { useAuth } from '../context/AuthContext.jsx';
 import api from '../services/api.js';
 
 const Welfare = () => {
+  const { user } = useAuth();
   const [dashboard, setDashboard] = useState({
     balance: 0,
     totalIncome: 0,
@@ -25,6 +27,9 @@ const Welfare = () => {
     loadDashboard();
   }, []);
 
+  const isAdmin =
+    user?.isSuperAdmin || user?.role?.name === 'Admin' || user?.role?.name === 'Super Admin';
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     await api.post('/welfare/transactions', {
@@ -37,69 +42,73 @@ const Welfare = () => {
 
   return (
     <div className="space-y-6">
-      <section className="grid gap-4 md:grid-cols-4">
-        <div className="rounded-2xl bg-white p-5 shadow-soft dark:bg-slate-900">
+      <section className={`grid gap-4 ${isAdmin ? 'md:grid-cols-4' : 'md:grid-cols-3'}`}>
+        <div className="brand-card rounded-2xl p-5">
           <p className="text-xs uppercase text-slate-400">Total Balance</p>
-          <p className="mt-2 font-display text-2xl text-accent-600">PKR {dashboard.balance}</p>
+          <p className="mt-2 font-display text-2xl text-amber-700">PKR {dashboard.balance}</p>
         </div>
-        <div className="rounded-2xl bg-white p-5 shadow-soft dark:bg-slate-900">
+        <div className="brand-card rounded-2xl p-5">
           <p className="text-xs uppercase text-slate-400">Monthly Income</p>
           <p className="mt-2 font-display text-2xl">PKR {dashboard.totalIncome}</p>
         </div>
-        <div className="rounded-2xl bg-white p-5 shadow-soft dark:bg-slate-900">
+        <div className="brand-card rounded-2xl p-5">
           <p className="text-xs uppercase text-slate-400">Monthly Expenses</p>
           <p className="mt-2 font-display text-2xl">PKR {dashboard.totalExpense}</p>
         </div>
-        <div className="rounded-2xl bg-white p-5 shadow-soft dark:bg-slate-900">
-          <p className="text-xs uppercase text-slate-400">Transparency</p>
-          <p className="mt-2 text-sm text-slate-500">Updated daily</p>
-        </div>
+        {isAdmin ? (
+          <div className="brand-card rounded-2xl p-5">
+            <p className="text-xs uppercase text-slate-400">Transparency</p>
+            <p className="mt-2 text-sm text-slate-500">Updated daily</p>
+          </div>
+        ) : null}
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
-        <h2 className="font-display text-lg">Add Welfare Transaction (Admin)</h2>
-        <form onSubmit={handleSubmit} className="mt-4 grid gap-3 md:grid-cols-3">
-          <select
-            value={form.type}
-            onChange={(e) => setForm({ ...form, type: e.target.value })}
-            className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-900"
-          >
-            <option value="income">Income</option>
-            <option value="expense">Expense</option>
-          </select>
-          <input
-            value={form.amount}
-            onChange={(e) => setForm({ ...form, amount: e.target.value })}
-            className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950"
-            placeholder="Amount"
-            required
-          />
-          <input
-            value={form.category}
-            onChange={(e) => setForm({ ...form, category: e.target.value })}
-            className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950"
-            placeholder="Category (medical, accident)"
-            required
-          />
-          <input
-            value={form.reason}
-            onChange={(e) => setForm({ ...form, reason: e.target.value })}
-            className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950"
-            placeholder="Reason"
-          />
-          <input
-            value={form.beneficiaryName}
-            onChange={(e) => setForm({ ...form, beneficiaryName: e.target.value })}
-            className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950"
-            placeholder="Beneficiary (optional)"
-          />
-          <button className="rounded-full bg-accent-500 px-4 py-2 text-sm font-semibold text-white md:col-span-3">
-            Add Transaction
-          </button>
-        </form>
-      </section>
+      {isAdmin ? (
+        <section className="brand-card rounded-2xl p-5">
+          <h2 className="font-display text-lg">Add Welfare Transaction (Admin)</h2>
+          <form onSubmit={handleSubmit} className="mt-4 grid gap-3 md:grid-cols-3">
+            <select
+              value={form.type}
+              onChange={(e) => setForm({ ...form, type: e.target.value })}
+              className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm"
+            >
+              <option value="income">Income</option>
+              <option value="expense">Expense</option>
+            </select>
+            <input
+              value={form.amount}
+              onChange={(e) => setForm({ ...form, amount: e.target.value })}
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm"
+              placeholder="Amount"
+              required
+            />
+            <input
+              value={form.category}
+              onChange={(e) => setForm({ ...form, category: e.target.value })}
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm"
+              placeholder="Category (medical, accident)"
+              required
+            />
+            <input
+              value={form.reason}
+              onChange={(e) => setForm({ ...form, reason: e.target.value })}
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm"
+              placeholder="Reason"
+            />
+            <input
+              value={form.beneficiaryName}
+              onChange={(e) => setForm({ ...form, beneficiaryName: e.target.value })}
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm"
+              placeholder="Beneficiary (optional)"
+            />
+            <button className="brand-button rounded-full px-4 py-2 text-sm font-semibold text-white md:col-span-3">
+              Add Transaction
+            </button>
+          </form>
+        </section>
+      ) : null}
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+      <section className="brand-card rounded-2xl p-5">
         <h2 className="font-display text-lg">Transaction History</h2>
         <div className="mt-4 space-y-3">
           {dashboard.transactions.map((tx) => (

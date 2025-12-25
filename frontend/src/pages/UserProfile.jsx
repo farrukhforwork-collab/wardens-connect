@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext.jsx';
 import api from '../services/api.js';
 
 const UserProfile = () => {
   const { id } = useParams();
+  const { user, updateProfile } = useAuth();
   const [profile, setProfile] = useState(null);
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState('');
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -20,6 +23,24 @@ const UserProfile = () => {
     };
     loadProfile();
   }, [id]);
+
+  const isOwnProfile = user?._id && profile?._id && user._id === profile._id;
+
+  const uploadFile = async (file, type) => {
+    if (!file) return;
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const { data } = await api.post('/uploads', formData);
+      const updates = type === 'cover' ? { coverUrl: data.url } : { avatarUrl: data.url };
+      await updateProfile(updates);
+      const refreshed = await api.get(`/users/${id}/profile`);
+      setProfile(refreshed.data.user);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   if (error) return <div className="text-sm text-red-500">{error}</div>;
   if (!profile) return <div className="text-sm text-slate-500">Loading profile...</div>;
@@ -54,13 +75,37 @@ const UserProfile = () => {
               </p>
             </div>
           </div>
-          <div className="absolute right-4 top-4">
+          <div className="absolute right-4 top-4 flex items-center gap-2">
             <Link
               to="/"
               className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-slate-700"
             >
               Back to feed
             </Link>
+            {isOwnProfile ? (
+              <>
+                <label className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-slate-700">
+                  {uploading ? 'Uploading...' : 'Change cover'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => uploadFile(e.target.files?.[0], 'cover')}
+                    disabled={uploading}
+                  />
+                </label>
+                <label className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-slate-700">
+                  Change photo
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => uploadFile(e.target.files?.[0], 'avatar')}
+                    disabled={uploading}
+                  />
+                </label>
+              </>
+            ) : null}
           </div>
         </div>
         <div className="px-6 pb-6 pt-12">

@@ -75,6 +75,18 @@ body {
   border-color: rgba(212, 175, 55, 0.45);
 }
 
+@media (max-width: 640px) {
+  body {
+    background: radial-gradient(circle at 10% 10%, rgba(212, 175, 55, 0.16), transparent 45%),
+      #fdfbd4;
+  }
+
+  .brand-card {
+    border-radius: 18px;
+    box-shadow: 0 16px 36px rgba(31, 41, 55, 0.12);
+  }
+}
+
 input:focus,
 textarea:focus,
 select:focus {
