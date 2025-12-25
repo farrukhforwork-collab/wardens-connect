@@ -6,7 +6,7 @@ const Login = () => {
   const { login, user } = useAuth();
   const navigate = useNavigate();
   const [mode, setMode] = useState('email');
-  const [form, setForm] = useState({ email: '', serviceId: '', cnic: '' });
+  const [form, setForm] = useState({ email: '', password: '', serviceId: '', cnic: '' });
   const [error, setError] = useState('');
 
   const handleSubmit = async (event) => {
@@ -14,7 +14,7 @@ const Login = () => {
     setError('');
     try {
       if (mode === 'email') {
-        await login({ email: form.email });
+        await login({ email: form.email, password: form.password });
       } else {
         await login({ serviceId: form.serviceId, cnic: form.cnic });
       }
@@ -68,6 +68,17 @@ const Login = () => {
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm"
               placeholder="warden@punjabpolice.gov.pk"
+              required
+            />
+          </div>
+          <div>
+            <label className="text-xs uppercase tracking-widest text-slate-400">Password</label>
+            <input
+              type="password"
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm"
+              placeholder="Your password"
               required
             />
           </div>

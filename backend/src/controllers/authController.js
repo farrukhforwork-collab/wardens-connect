@@ -8,7 +8,18 @@ const login = async (req, res, next) => {
     let user;
 
     if (email) {
+      const { password } = req.body;
+      if (!password) {
+        return res.status(400).json({ message: 'Password is required for email login' });
+      }
       user = await User.findOne({ email: email.toLowerCase() }).populate('role');
+      if (user && !user.passwordHash) {
+        return res.status(400).json({ message: 'Password not set. Use Service ID + CNIC.' });
+      }
+      if (user) {
+        const match = await compareSensitive(password, user.passwordHash);
+        if (!match) user = null;
+      }
     } else if (serviceId && cnic) {
       user = await User.findOne({ serviceId }).populate('role');
       if (user) {

@@ -8,6 +8,13 @@ const Profile = () => {
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState('');
 
   const loadProfile = async () => {
     if (!user?._id) return;
@@ -37,6 +44,26 @@ const Profile = () => {
     } finally {
       setUploading(false);
     }
+  };
+
+  const handlePasswordUpdate = async (event) => {
+    event.preventDefault();
+    setPasswordError('');
+    setPasswordSuccess('');
+    if (passwordForm.newPassword.length < 8) {
+      setPasswordError('Password must be at least 8 characters.');
+      return;
+    }
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordError('Passwords do not match.');
+      return;
+    }
+    await api.patch('/users/me/password', {
+      currentPassword: passwordForm.currentPassword || undefined,
+      newPassword: passwordForm.newPassword
+    });
+    setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    setPasswordSuccess('Password updated.');
   };
 
   if (error) return <div className="text-sm text-red-500">{error}</div>;
@@ -104,15 +131,55 @@ const Profile = () => {
               <p className="text-xs uppercase tracking-widest text-slate-400">Phone</p>
               <p className="text-sm text-slate-700">{profile?.phone || '-'}</p>
             </div>
-            <div>
-              <p className="text-xs uppercase tracking-widest text-slate-400">Email</p>
-              <p className="text-sm text-slate-700">{profile?.email || '-'}</p>
-            </div>
           </div>
         </div>
       </section>
 
       <section className="space-y-4">
+        <div className="brand-card rounded-2xl p-5">
+          <h3 className="text-sm font-semibold text-slate-700">Security</h3>
+          <form onSubmit={handlePasswordUpdate} className="mt-4 grid gap-3 md:grid-cols-3">
+            <input
+              type="password"
+              value={passwordForm.currentPassword}
+              onChange={(e) =>
+                setPasswordForm({ ...passwordForm, currentPassword: e.target.value })
+              }
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm"
+              placeholder="Current password"
+            />
+            <input
+              type="password"
+              value={passwordForm.newPassword}
+              onChange={(e) =>
+                setPasswordForm({ ...passwordForm, newPassword: e.target.value })
+              }
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm"
+              placeholder="New password"
+              required
+            />
+            <input
+              type="password"
+              value={passwordForm.confirmPassword}
+              onChange={(e) =>
+                setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })
+              }
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm"
+              placeholder="Confirm password"
+              required
+            />
+            {passwordError ? (
+              <p className="text-xs text-red-500 md:col-span-3">{passwordError}</p>
+            ) : null}
+            {passwordSuccess ? (
+              <p className="text-xs text-green-600 md:col-span-3">{passwordSuccess}</p>
+            ) : null}
+            <button className="brand-button rounded-full px-4 py-2 text-sm font-semibold text-white md:col-span-3">
+              Update password
+            </button>
+          </form>
+        </div>
+
         <h3 className="text-sm font-semibold text-slate-700">Recent Posts</h3>
         {posts.length ? (
           posts.map((post) => (

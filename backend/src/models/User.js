@@ -8,6 +8,7 @@ const userSchema = new mongoose.Schema(
     rank: { type: String, trim: true },
     cnicHash: { type: String },
     cnicLast4: { type: String },
+    passwordHash: { type: String },
     role: { type: mongoose.Schema.Types.ObjectId, ref: 'Role', required: true },
     status: { type: String, enum: ['pending', 'active', 'blocked'], default: 'pending' },
     approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

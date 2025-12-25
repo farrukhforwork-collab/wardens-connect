@@ -19,6 +19,10 @@ const runSeed = async () => {
 
   const superRole = roles.find((r) => r.name === 'Super Admin');
   const cnicHash = await hashSensitive('12345-6789012-3');
+  if (!env.seedAdminPassword) {
+    throw new Error('SEED_ADMIN_PASSWORD is required to seed the super admin account.');
+  }
+  const passwordHash = await hashSensitive(env.seedAdminPassword);
 
   await User.create({
     fullName: 'HQ Super Admin',
@@ -26,6 +30,7 @@ const runSeed = async () => {
     serviceId: 'HQ-0001',
     cnicHash,
     cnicLast4: '0123',
+    passwordHash,
     role: superRole.id,
     status: 'active',
     isSuperAdmin: true

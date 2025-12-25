@@ -67,9 +67,12 @@ const getInvite = async (req, res, next) => {
 
 const registerWithInvite = async (req, res, next) => {
   try {
-    const { fullName, cnic, station, city, phone } = req.body;
-    if (!fullName || !cnic) {
-      return res.status(400).json({ message: 'Full name and CNIC are required' });
+    const { fullName, cnic, password, station, city, phone } = req.body;
+    if (!fullName || !cnic || !password) {
+      return res.status(400).json({ message: 'Full name, CNIC, and password are required' });
+    }
+    if (password.length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters' });
     }
 
     const invite = await Invite.findOne({ token: req.params.token }).populate('role');
@@ -88,12 +91,14 @@ const registerWithInvite = async (req, res, next) => {
 
     const cnicHash = await hashSensitive(cnic);
     const cnicLast4 = cnic.slice(-4);
+    const passwordHash = await hashSensitive(password);
     const user = await User.create({
       fullName,
       email: invite.email,
       serviceId: invite.serviceId,
       cnicHash,
       cnicLast4,
+      passwordHash,
       role: invite.role.id,
       station,
       city,

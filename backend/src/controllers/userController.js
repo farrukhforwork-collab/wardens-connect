@@ -1,12 +1,13 @@
 const User = require('../models/User');
 const Role = require('../models/Role');
 const Post = require('../models/Post');
-const { hashSensitive } = require('../utils/crypto');
+const { hashSensitive, compareSensitive } = require('../utils/crypto');
 const { recordAudit } = require('../services/auditService');
 
 const createUser = async (req, res, next) => {
   try {
-    const { fullName, email, serviceId, cnic, roleName, station, city, phone } = req.body;
+    const { fullName, email, serviceId, cnic, password, roleName, station, city, phone } =
+      req.body;
     if (!email || !serviceId || !cnic) {
       return res.status(400).json({
         message: 'Email, Service ID, and CNIC are required for invites'
@@ -18,12 +19,15 @@ const createUser = async (req, res, next) => {
     const cnicHash = cnic ? await hashSensitive(cnic) : undefined;
     const cnicLast4 = cnic ? cnic.slice(-4) : undefined;
 
+    const passwordHash = password ? await hashSensitive(password) : undefined;
+
     const user = await User.create({
       fullName,
       email: email?.toLowerCase(),
       serviceId,
       cnicHash,
       cnicLast4,
+      passwordHash,
       role: role.id,
       station,
       city,
@@ -142,6 +146,36 @@ const getProfile = async (req, res, next) => {
   }
 };
 
+const updatePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!newPassword || newPassword.length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters' });
+    }
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    if (user.passwordHash) {
+      if (!currentPassword) {
+        return res.status(400).json({ message: 'Current password is required' });
+      }
+      const match = await compareSensitive(currentPassword, user.passwordHash);
+      if (!match) {
+        return res.status(400).json({ message: 'Current password is incorrect' });
+      }
+    }
+
+    user.passwordHash = await hashSensitive(newPassword);
+    await user.save();
+
+    await recordAudit({ actor: req.user.id, action: 'user.password.update', target: user.id });
+
+    res.json({ message: 'Password updated' });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createUser,
   listPending,
@@ -150,5 +184,6 @@ module.exports = {
   updateUserRole,
   blockUser,
   updateMe,
+  updatePassword,
   getProfile
 };

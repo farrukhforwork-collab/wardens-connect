@@ -9,6 +9,7 @@ const {
   updateUserRole,
   blockUser,
   updateMe,
+  updatePassword,
   getProfile
 } = require('../controllers/userController');
 
@@ -21,6 +22,7 @@ router.get('/', rbac('Admin', 'Super Admin'), listUsers);
 router.get('/pending', rbac('Admin', 'Super Admin'), listPending);
 router.get('/:id/profile', getProfile);
 router.patch('/me', updateMe);
+router.patch('/me/password', updatePassword);
 router.patch('/:id/approve', rbac('Admin', 'Super Admin'), approveUser);
 router.patch('/:id/role', rbac('Admin', 'Super Admin'), updateUserRole);
 router.patch('/:id/block', rbac('Admin', 'Super Admin'), blockUser);

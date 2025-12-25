@@ -11,6 +11,8 @@ const RequestAccess = () => {
     rank: 'TW',
     serviceId: '',
     cnic: '',
+    password: '',
+    confirmPassword: '',
     station: '',
     city: '',
     phone: ''
@@ -21,8 +23,19 @@ const RequestAccess = () => {
   const submit = async (event) => {
     event.preventDefault();
     setError('');
+    if (form.password.length < 8) {
+      setError('Password must be at least 8 characters.');
+      return;
+    }
+    if (form.password !== form.confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
     try {
-      const { data } = await api.post('/requests/register', form);
+      const { data } = await api.post('/requests/register', {
+        ...form,
+        confirmPassword: undefined
+      });
       setSuccess(data.message || 'Request submitted');
     } catch (err) {
       setError(err?.response?.data?.message || 'Request failed');
@@ -89,6 +102,22 @@ const RequestAccess = () => {
             onChange={(e) => setForm({ ...form, cnic: e.target.value })}
             className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm"
             placeholder="CNIC"
+            required
+          />
+          <input
+            type="password"
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm"
+            placeholder="Password (min 8 characters)"
+            required
+          />
+          <input
+            type="password"
+            value={form.confirmPassword}
+            onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
+            className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm"
+            placeholder="Confirm password"
             required
           />
           <input

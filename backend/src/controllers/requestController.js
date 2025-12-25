@@ -4,12 +4,15 @@ const { hashSensitive } = require('../utils/crypto');
 
 const requestAccess = async (req, res, next) => {
   try {
-    const { fullName, email, serviceId, rank, cnic, station, city, phone } = req.body;
+    const { fullName, email, serviceId, rank, cnic, password, station, city, phone } = req.body;
 
-    if (!fullName || !email || !serviceId || !cnic) {
+    if (!fullName || !email || !serviceId || !cnic || !password) {
       return res.status(400).json({
-        message: 'Full name, email, service ID, and CNIC are required'
+        message: 'Full name, email, service ID, CNIC, and password are required'
       });
+    }
+    if (password.length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters' });
     }
 
     const existing = await User.findOne({
@@ -25,6 +28,8 @@ const requestAccess = async (req, res, next) => {
     const cnicHash = await hashSensitive(cnic);
     const cnicLast4 = cnic.slice(-4);
 
+    const passwordHash = await hashSensitive(password);
+
     const user = await User.create({
       fullName,
       email: email.toLowerCase(),
@@ -32,6 +37,7 @@ const requestAccess = async (req, res, next) => {
       rank,
       cnicHash,
       cnicLast4,
+      passwordHash,
       role: role.id,
       station,
       city,

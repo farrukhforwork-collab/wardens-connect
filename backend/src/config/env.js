@@ -26,7 +26,8 @@ const env = {
     privateKey: process.env.FIREBASE_PRIVATE_KEY
   },
   auditLogRetentionDays: Number(process.env.AUDIT_LOG_RETENTION_DAYS || 180),
-  seedSecret: process.env.SEED_SECRET
+  seedSecret: process.env.SEED_SECRET,
+  seedAdminPassword: process.env.SEED_ADMIN_PASSWORD
 };
 
 module.exports = env;
