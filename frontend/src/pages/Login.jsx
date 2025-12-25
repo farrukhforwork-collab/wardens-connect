@@ -60,28 +60,32 @@ const Login = () => {
       </div>
       <form className="space-y-4" onSubmit={handleSubmit}>
         {mode === 'email' ? (
-          <div>
-            <label className="text-xs uppercase tracking-widest text-slate-400">Official Email</label>
-            <input
-              type="email"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm"
-              placeholder="warden@punjabpolice.gov.pk"
-              required
-            />
-          </div>
-          <div>
-            <label className="text-xs uppercase tracking-widest text-slate-400">Password</label>
-            <input
-              type="password"
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-              className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm"
-              placeholder="Your password"
-              required
-            />
-          </div>
+          <>
+            <div>
+              <label className="text-xs uppercase tracking-widest text-slate-400">
+                Official Email
+              </label>
+              <input
+                type="email"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm"
+                placeholder="warden@punjabpolice.gov.pk"
+                required
+              />
+            </div>
+            <div>
+              <label className="text-xs uppercase tracking-widest text-slate-400">Password</label>
+              <input
+                type="password"
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm"
+                placeholder="Your password"
+                required
+              />
+            </div>
+          </>
         ) : (
           <>
             <div>
