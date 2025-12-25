@@ -15,6 +15,11 @@ const messageSchema = new mongoose.Schema(
     to: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     group: { type: mongoose.Schema.Types.ObjectId, ref: 'Group' },
     text: { type: String },
+    encryptedText: {
+      iv: { type: String },
+      content: { type: String },
+      tag: { type: String }
+    },
     attachment: attachmentSchema,
     readBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
   },
