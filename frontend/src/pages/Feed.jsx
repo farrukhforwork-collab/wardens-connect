@@ -1,10 +1,11 @@
-﻿import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+﻿import React, { useEffect, useMemo, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import api from '../services/api.js';
 import { useAuth } from '../context/AuthContext.jsx';
 
 const Feed = () => {
   const { user } = useAuth();
+  const location = useLocation();
   const [posts, setPosts] = useState([]);
   const [text, setText] = useState('');
   const [category, setCategory] = useState('personal');
@@ -63,6 +64,24 @@ const Feed = () => {
     setCommentDrafts((prev) => ({ ...prev, [postId]: '' }));
   };
 
+  const query = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return (params.get('q') || '').trim().toLowerCase();
+  }, [location.search]);
+
+  const filteredPosts = useMemo(() => {
+    if (!query) return posts;
+    return posts.filter((post) => {
+      const author = post.author?.fullName || '';
+      const station = post.author?.station || '';
+      const city = post.author?.city || '';
+      const category = post.category || '';
+      const textValue = post.text || '';
+      const haystack = ${author}    .toLowerCase();
+      return haystack.includes(query);
+    });
+  }, [posts, query]);
+
   return (
     <div className="space-y-6">
       <section id="create-post" className="brand-card rounded-2xl p-5">
@@ -111,8 +130,9 @@ const Feed = () => {
       </section>
 
       <section className="space-y-4 animate-stagger">
-        {posts.map((post) => (
-          <article key={post._id} className="brand-card rounded-2xl p-5">
+        {filteredPosts.length ? (
+          filteredPosts.map((post) => (
+            <article key={post._id} className="brand-card rounded-2xl p-5">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
                 {post.author?.avatarUrl ? (
@@ -216,12 +236,20 @@ const Feed = () => {
               </div>
             )}
           </article>
-        ))}
+          ))
+        ) : (
+          <p className="text-sm text-slate-500">No posts found for this search.</p>
+        )}
       </section>
     </div>
   );
 };
 
 export default Feed;
+
+
+
+
+
 
 

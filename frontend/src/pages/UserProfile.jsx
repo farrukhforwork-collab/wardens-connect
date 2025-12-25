@@ -118,10 +118,6 @@ const UserProfile = () => {
               <p className="text-xs uppercase tracking-widest text-slate-400">Phone</p>
               <p className="text-sm text-slate-700">{profile.phone || '-'}</p>
             </div>
-            <div>
-              <p className="text-xs uppercase tracking-widest text-slate-400">Email</p>
-              <p className="text-sm text-slate-700">{profile.email || '-'}</p>
-            </div>
           </div>
         </div>
       </section>

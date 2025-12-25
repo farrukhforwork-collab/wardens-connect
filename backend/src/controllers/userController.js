@@ -2,6 +2,7 @@ const User = require('../models/User');
 const Role = require('../models/Role');
 const Post = require('../models/Post');
 const { hashSensitive, compareSensitive } = require('../utils/crypto');
+const { getOnlineUserIds } = require('../services/socketService');
 const { recordAudit } = require('../services/auditService');
 
 const createUser = async (req, res, next) => {
@@ -176,6 +177,32 @@ const updatePassword = async (req, res, next) => {
   }
 };
 
+const listChatUsers = async (req, res, next) => {
+  try {
+    const onlineIds = new Set(getOnlineUserIds());
+    const users = await User.find({ status: 'active' })
+      .select('fullName avatarUrl rank station city role')
+      .populate('role');
+
+    const list = users
+      .filter((u) => u.id !== req.user.id)
+      .map((u) => ({
+        _id: u.id,
+        fullName: u.fullName,
+        avatarUrl: u.avatarUrl,
+        rank: u.rank,
+        station: u.station,
+        city: u.city,
+        role: u.role ? { name: u.role.name } : null,
+        isOnline: onlineIds.has(u.id)
+      }));
+
+    res.json({ users: list });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createUser,
   listPending,
@@ -185,5 +212,6 @@ module.exports = {
   blockUser,
   updateMe,
   updatePassword,
-  getProfile
+  getProfile,
+  listChatUsers
 };

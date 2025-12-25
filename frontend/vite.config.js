@@ -12,8 +12,8 @@ export default defineConfig({
         name: 'Wardens Connect',
         short_name: 'Wardens',
         description: 'Private social & welfare platform for Punjab Traffic Wardens',
-        theme_color: '#f97316',
-        background_color: '#f3f4f6',
+        theme_color: '#d4af37',
+        background_color: '#fdfbd4',
         display: 'standalone',
         icons: [
           {

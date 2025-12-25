@@ -1,5 +1,5 @@
 ﻿import React, { useEffect, useMemo, useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useTheme } from '../context/ThemeContext.jsx';
 import api from '../services/api.js';
@@ -16,6 +16,8 @@ const navItems = [
 const AppLayout = ({ children }) => {
   const { user, logout, updateProfile } = useAuth();
   const { theme, setTheme } = useTheme();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [welfare, setWelfare] = useState({ balance: 0, totalIncome: 0, totalExpense: 0 });
   const [monthFilter, setMonthFilter] = useState('');
   const [notices, setNotices] = useState([]);
@@ -23,6 +25,9 @@ const AppLayout = ({ children }) => {
   const [noticeSort, setNoticeSort] = useState('newest');
   const [profileOpen, setProfileOpen] = useState(false);
   const [installPrompt, setInstallPrompt] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
   const [profileForm, setProfileForm] = useState({
     fullName: '',
     station: '',
@@ -69,6 +74,11 @@ const AppLayout = ({ children }) => {
     window.addEventListener('beforeinstallprompt', handleBeforeInstall);
     return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
   }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    setSearchQuery(params.get('q') || '');
+  }, [location.search]);
 
   useEffect(() => {
     const loadSidebar = async () => {
@@ -144,6 +154,27 @@ const AppLayout = ({ children }) => {
     setInstallPrompt(null);
   };
 
+  const handleSearchChange = (value) => {
+    setSearchQuery(value);
+    const params = new URLSearchParams(location.search);
+    if (value) params.set('q', value);
+    else params.delete('q');
+    navigate({ pathname: '/', search: params.toString() });
+  };
+
+  const toggleNotifications = async () => {
+    const nextState = !notifOpen;
+    setNotifOpen(nextState);
+    if (!nextState) return;
+    try {
+      const { data } = await api.get('/notifications');
+      setNotifications(data.notifications || []);
+      await api.patch('/notifications/read');
+    } catch (error) {
+      // ignore
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-950">
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95">
@@ -157,9 +188,12 @@ const AppLayout = ({ children }) => {
             </div>
           </Link>
           <div className="hidden flex-1 lg:block">
-            <div className="flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-2 sm:px-4 text-sm text-slate-500">
-              Search wardens, posts, pages
-            </div>
+            <input
+              value={searchQuery}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className="w-full rounded-full border border-slate-200 bg-slate-50 px-3 py-2 sm:px-4 text-sm text-slate-600"
+              placeholder="Search wardens, posts, pages"
+            />
           </div>
           <div className="ml-auto flex items-center gap-2">
             {installPrompt ? (
@@ -179,18 +213,43 @@ const AppLayout = ({ children }) => {
                 <path d="M20 20l-3.5-3.5" strokeWidth="2" />
               </svg>
             </button>
-            <button
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200"
-              aria-label="Notifications"
-            >
-              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor">
-                <path
-                  d="M6 9a6 6 0 1112 0c0 7 3 6 3 8H3c0-2 3-1 3-8z"
-                  strokeWidth="2"
-                />
-                <path d="M9 19a3 3 0 006 0" strokeWidth="2" />
-              </svg>
-            </button>
+            <div className="relative">
+              <button
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200"
+                aria-label="Notifications"
+                onClick={toggleNotifications}
+              >
+                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor">
+                  <path
+                    d="M6 9a6 6 0 1112 0c0 7 3 6 3 8H3c0-2 3-1 3-8z"
+                    strokeWidth="2"
+                  />
+                  <path d="M9 19a3 3 0 006 0" strokeWidth="2" />
+                </svg>
+              </button>
+              {notifications.some((n) => !n.isRead) ? (
+                <span className="absolute right-0 top-0 h-2 w-2 rounded-full bg-amber-500" />
+              ) : null}
+              {notifOpen ? (
+                <div className="absolute right-0 mt-2 w-72 rounded-2xl border border-slate-200 bg-white p-3 text-xs shadow-soft">
+                  <p className="mb-2 font-semibold text-slate-700">Notifications</p>
+                  <div className="max-h-56 space-y-2 overflow-y-auto">
+                    {notifications.length ? (
+                      notifications.map((note) => (
+                        <div key={note._id} className="rounded-xl bg-slate-50 p-2">
+                          <p className="text-slate-700">{note.message || note.type}</p>
+                          <p className="text-[11px] text-slate-400">
+                            {new Date(note.createdAt).toLocaleString()}
+                          </p>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-slate-500">No notifications yet.</p>
+                    )}
+                  </div>
+                </div>
+              ) : null}
+            </div>
             <button
               className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200"
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
@@ -211,10 +270,16 @@ const AppLayout = ({ children }) => {
       <div className="mx-auto w-full max-w-7xl px-3 pt-4 sm:hidden">
         <div className="brand-card rounded-2xl p-3">
           <div className="flex items-center gap-3">
-            <div className="flex-1 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs text-slate-500">
-              Search wardens, posts, pages
-            </div>
-            <Link to="/#create-post" className="brand-button rounded-full px-3 py-2 text-xs text-white">
+            <input
+              value={searchQuery}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className="flex-1 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600"
+              placeholder="Search wardens, posts, pages"
+            />
+            <Link
+              to="/#create-post"
+              className="brand-button rounded-full px-3 py-2 text-xs text-white"
+            >
               Post
             </Link>
           </div>
@@ -426,20 +491,6 @@ const AppLayout = ({ children }) => {
         </div>
       </div>
 
-      <div className="fixed bottom-16 left-0 right-0 z-40 mx-auto flex max-w-sm items-center justify-between rounded-full border border-slate-200 bg-white px-3 py-2 sm:px-4 text-xs shadow-soft lg:hidden">
-        <Link to="/#create-post" className="brand-button rounded-full px-3 py-2 sm:px-4 text-white">
-          New post
-        </Link>
-        <Link to="/welfare" className="rounded-full border border-slate-200 px-3 py-2 sm:px-4">
-          Welfare
-        </Link>
-        {isAdmin ? (
-          <Link to="/#create-post" className="rounded-full border border-slate-200 px-3 py-2">
-            Notice
-          </Link>
-        ) : null}
-      </div>
-
       <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white/95 px-3 py-2 sm:px-4 backdrop-blur lg:hidden">
         <div className="flex items-center justify-around text-xs">
           {visibleNavItems.map((item) => (
@@ -530,6 +581,14 @@ const AppLayout = ({ children }) => {
 };
 
 export default AppLayout;
+
+
+
+
+
+
+
+
 
 
 

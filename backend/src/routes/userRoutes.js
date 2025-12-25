@@ -10,7 +10,8 @@ const {
   blockUser,
   updateMe,
   updatePassword,
-  getProfile
+  getProfile,
+  listChatUsers
 } = require('../controllers/userController');
 
 const router = express.Router();
@@ -20,6 +21,7 @@ router.use(auth);
 router.post('/', rbac('Admin', 'Super Admin'), createUser);
 router.get('/', rbac('Admin', 'Super Admin'), listUsers);
 router.get('/pending', rbac('Admin', 'Super Admin'), listPending);
+router.get('/chat', listChatUsers);
 router.get('/:id/profile', getProfile);
 router.patch('/me', updateMe);
 router.patch('/me/password', updatePassword);
