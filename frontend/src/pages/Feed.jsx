@@ -10,6 +10,9 @@ const Feed = () => {
   const [text, setText] = useState('');
   const [category, setCategory] = useState('personal');
   const [isOfficialNotice, setIsOfficialNotice] = useState(false);
+  const [attachments, setAttachments] = useState([]);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
   const [openComments, setOpenComments] = useState({});
   const [commentsByPost, setCommentsByPost] = useState({});
   const [commentDrafts, setCommentDrafts] = useState({});
@@ -29,11 +32,41 @@ const Feed = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (!text.trim()) return;
-    await api.post('/posts', { text, category, isOfficialNotice });
+    if (!text.trim() && !attachments.length) return;
+    await api.post('/posts', {
+      text: text.trim(),
+      category,
+      isOfficialNotice,
+      media: attachments
+    });
     setText('');
     setIsOfficialNotice(false);
+    setAttachments([]);
+    setUploadError('');
     loadPosts();
+  };
+
+  const handleFile = async (file) => {
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      setUploadError('File too large (max 10MB)');
+      return;
+    }
+    setUploadError('');
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const { data } = await api.post('/uploads', formData);
+      const type = data.type || (file.type.startsWith('video') ? 'video' : 'image');
+      setAttachments((prev) =>
+        prev.concat({ url: data.url, type, name: file.name })
+      );
+    } catch (err) {
+      setUploadError(err?.response?.data?.message || 'Upload failed');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const isAdmin =
@@ -100,6 +133,16 @@ const Feed = () => {
             placeholder="Write something for wardens..."
           />
           <div className="flex flex-wrap items-center gap-3">
+            <label className="rounded-full border border-slate-200 px-3 py-2 text-xs text-slate-600">
+              {uploading ? 'Uploading...' : 'Add media'}
+              <input
+                type="file"
+                accept="image/*,video/*"
+                className="hidden"
+                onChange={(e) => handleFile(e.target.files?.[0])}
+                disabled={uploading}
+              />
+            </label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
@@ -126,6 +169,19 @@ const Feed = () => {
               Publish
             </button>
           </div>
+          {attachments.length ? (
+            <div className="flex flex-wrap gap-2">
+              {attachments.map((file) => (
+                <span
+                  key={file.url}
+                  className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-500"
+                >
+                  {file.name || file.type}
+                </span>
+              ))}
+            </div>
+          ) : null}
+          {uploadError ? <p className="text-xs text-red-500">{uploadError}</p> : null}
         </form>
       </section>
 

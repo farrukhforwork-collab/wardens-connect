@@ -12,6 +12,9 @@ const Chat = () => {
   const [activeUser, setActiveUser] = useState(null);
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
+  const [attachment, setAttachment] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
   const [search, setSearch] = useState('');
 
   useEffect(() => {
@@ -81,14 +84,37 @@ const Chat = () => {
 
   const handleSend = async (event) => {
     event.preventDefault();
-    if (!text.trim()) return;
+    if (!text.trim() && !attachment) return;
     if (view === 'group' && activeGroup) {
-      await api.post('/messages', { group: activeGroup._id, text });
+      await api.post('/messages', { group: activeGroup._id, text: text.trim(), attachment });
     }
     if (view === 'direct' && activeUser) {
-      await api.post('/messages', { to: activeUser._id, text });
+      await api.post('/messages', { to: activeUser._id, text: text.trim(), attachment });
     }
     setText('');
+    setAttachment(null);
+    setUploadError('');
+  };
+
+  const handleFile = async (file) => {
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      setUploadError('File too large (max 10MB)');
+      return;
+    }
+    setUploadError('');
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const { data } = await api.post('/uploads', formData);
+      const type = data.type || (file.type.startsWith('video') ? 'video' : 'image');
+      setAttachment({ url: data.url, type, name: file.name });
+    } catch (err) {
+      setUploadError(err?.response?.data?.message || 'Upload failed');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const filteredUsers = useMemo(() => {
@@ -192,12 +218,44 @@ const Chat = () => {
                   : 'bg-slate-100 text-slate-700'
               }`}
             >
-              {msg.text}
+              {msg.text ? <p>{msg.text}</p> : null}
+              {msg.attachment ? (
+                <div className="mt-2 overflow-hidden rounded-xl bg-white/70">
+                  {msg.attachment.type === 'image' ? (
+                    <img
+                      src={msg.attachment.url}
+                      alt={msg.attachment.name || 'Attachment'}
+                      className="h-40 w-full object-cover"
+                    />
+                  ) : msg.attachment.type === 'video' ? (
+                    <video src={msg.attachment.url} controls className="h-40 w-full object-cover" />
+                  ) : (
+                    <a
+                      href={msg.attachment.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex h-24 items-center justify-center text-xs text-slate-700"
+                    >
+                      View document
+                    </a>
+                  )}
+                </div>
+              ) : null}
             </div>
           ))}
         </div>
         <form onSubmit={handleSend} className="border-t border-slate-200 p-3">
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <label className="flex items-center justify-center rounded-full border border-slate-200 px-3 py-2 text-xs text-slate-600">
+              {uploading ? 'Uploading...' : 'Add media'}
+              <input
+                type="file"
+                accept="image/*,video/*"
+                className="hidden"
+                onChange={(e) => handleFile(e.target.files?.[0])}
+                disabled={uploading}
+              />
+            </label>
             <input
               value={text}
               onChange={(e) => setText(e.target.value)}
@@ -208,6 +266,19 @@ const Chat = () => {
               Send
             </button>
           </div>
+          {attachment ? (
+            <div className="mt-2 flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+              <span>Attached: {attachment.name || attachment.type}</span>
+              <button
+                type="button"
+                onClick={() => setAttachment(null)}
+                className="text-amber-700"
+              >
+                Remove
+              </button>
+            </div>
+          ) : null}
+          {uploadError ? <p className="mt-2 text-xs text-red-500">{uploadError}</p> : null}
         </form>
       </section>
     </div>
