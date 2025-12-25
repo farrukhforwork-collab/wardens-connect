@@ -103,7 +103,7 @@ const Login = () => {
           <span className="text-xs text-slate-500">Accounts require admin approval.</span>
           <Link
             to="/request-access"
-            className="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700"
+            className="brand-button inline-flex items-center justify-center rounded-2xl px-4 py-3 text-sm font-semibold text-white"
           >
             Create account (invite only)
           </Link>

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import AuthLayout from './layouts/AuthLayout.jsx';
 import AppLayout from './layouts/AppLayout.jsx';
@@ -13,6 +13,7 @@ import Admin from './pages/Admin.jsx';
 import InviteSignup from './pages/InviteSignup.jsx';
 import RequestAccess from './pages/RequestAccess.jsx';
 import Profile from './pages/Profile.jsx';
+import UserProfile from './pages/UserProfile.jsx';
 
 const App = () => (
   <Routes>
@@ -51,6 +52,7 @@ const App = () => (
               <Route path="/pages" element={<Pages />} />
               <Route path="/welfare" element={<Welfare />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/profile/:id" element={<UserProfile />} />
               <Route
                 path="/admin"
                 element={
@@ -68,3 +70,4 @@ const App = () => (
 );
 
 export default App;
+

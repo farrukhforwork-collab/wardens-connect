@@ -218,8 +218,8 @@ const AppLayout = ({ children }) => {
                   className={({ isActive }) =>
                     `rounded-xl px-3 py-2 text-sm font-medium transition ${
                       isActive
-                        ? 'bg-accent-500/15 text-accent-600'
-                        : 'text-slate-600 hover:bg-slate-100'
+                        ? 'bg-amber-100 text-amber-700'
+                        : 'text-slate-600 hover:bg-amber-50 hover:text-amber-700'
                     }`
                   }
                 >
@@ -409,7 +409,7 @@ const AppLayout = ({ children }) => {
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
-                isActive ? 'text-accent-600' : 'text-slate-500'
+                isActive ? 'text-amber-700' : 'text-slate-500'
               }
             >
               {item.label}
@@ -492,4 +492,5 @@ const AppLayout = ({ children }) => {
 };
 
 export default AppLayout;
+
 

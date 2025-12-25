@@ -1,4 +1,5 @@
 ﻿import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../services/api.js';
 import { useAuth } from '../context/AuthContext.jsx';
 
@@ -124,7 +125,7 @@ const Feed = () => {
                   <div className="h-12 w-12 rounded-full bg-slate-200" />
                 )}
                 <div>
-                  <p className="text-sm font-semibold">{post.author?.fullName}</p>
+                  <Link to={post.author?._id ? '/profile/' + post.author._id : '/profile'} className="text-sm font-semibold text-slate-900 hover:text-amber-700">{post.author?.fullName}</Link>
                   <p className="text-xs text-slate-400">
                     {(post.author?.rank || post.author?.role?.name || 'Warden') +
                       ' | ' +
@@ -222,4 +223,5 @@ const Feed = () => {
 };
 
 export default Feed;
+
 

@@ -4,12 +4,14 @@
 
 :root {
   color-scheme: light;
-  --brand-ink: #0f172a;
-  --brand-slate: #1f2937;
-  --brand-ember: #f97316;
-  --brand-sun: #fb923c;
-  --brand-glow: rgba(249, 115, 22, 0.2);
-  --brand-mist: rgba(15, 23, 42, 0.08);
+  --brand-ink: #1f2937;
+  --brand-slate: #4b5563;
+  --brand-ember: #d4af37;
+  --brand-sun: #ce8946;
+  --brand-olive: #bdb76b;
+  --brand-cream: #fdfbd4;
+  --brand-glow: rgba(206, 137, 70, 0.28);
+  --brand-mist: rgba(31, 41, 55, 0.08);
 }
 
 .dark {
@@ -18,9 +20,9 @@
 
 body {
   font-family: theme('fontFamily.body');
-  background: radial-gradient(circle at 20% 20%, rgba(249, 115, 22, 0.08), transparent 40%),
-    radial-gradient(circle at 80% 10%, rgba(15, 23, 42, 0.06), transparent 45%),
-    #f8fafc;
+  background: radial-gradient(circle at 15% 20%, rgba(212, 175, 55, 0.12), transparent 40%),
+    radial-gradient(circle at 85% 12%, rgba(206, 137, 70, 0.12), transparent 45%),
+    var(--brand-cream);
 }
 
 .glass {
@@ -33,10 +35,11 @@ body {
 }
 
 .brand-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.9));
-  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: linear-gradient(135deg, rgba(253, 251, 212, 0.9), rgba(255, 255, 255, 0.95));
+  border: 1px solid rgba(212, 175, 55, 0.2);
   box-shadow: 0 24px 50px var(--brand-mist);
   backdrop-filter: blur(18px);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .dark .brand-card {
@@ -47,6 +50,13 @@ body {
 .brand-button {
   background: linear-gradient(135deg, var(--brand-ember), var(--brand-sun));
   box-shadow: 0 10px 24px var(--brand-glow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.brand-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 28px var(--brand-glow);
+  filter: saturate(1.1);
 }
 
 .brand-button:active {
@@ -54,9 +64,35 @@ body {
 }
 
 .brand-pill {
-  background: rgba(249, 115, 22, 0.12);
+  background: rgba(212, 175, 55, 0.14);
   color: var(--brand-ember);
-  border: 1px solid rgba(249, 115, 22, 0.35);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+}
+
+.brand-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 28px 60px rgba(31, 41, 55, 0.12);
+  border-color: rgba(212, 175, 55, 0.45);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid rgba(212, 175, 55, 0.35);
+  outline-offset: 2px;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(253, 251, 212, 0.6);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #d4af37, #ce8946);
+  border-radius: 999px;
 }
 
 @keyframes rise {

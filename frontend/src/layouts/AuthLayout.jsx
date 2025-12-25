@@ -1,7 +1,7 @@
 import React from 'react';
 
 const AuthLayout = ({ children }) => (
-  <div className="min-h-screen bg-[#f3f4f6] px-6 py-10">
+  <div className="min-h-screen bg-[#fdfbd4] px-6 py-10">
     <div className="mx-auto grid w-full max-w-6xl gap-10 lg:grid-cols-[1.1fr_0.9fr]">
       <div className="flex flex-col justify-center gap-6">
         <div className="flex items-center gap-3">
