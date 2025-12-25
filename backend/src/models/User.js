@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema(
     approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     approvedAt: { type: Date },
     avatarUrl: { type: String },
+    coverUrl: { type: String },
     phone: { type: String },
     station: { type: String },
     city: { type: String },

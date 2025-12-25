@@ -31,19 +31,17 @@ const Login = () => {
   }, [user, navigate]);
 
   return (
-    <div>
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="font-display text-2xl">Sign in</h2>
-          <p className="text-sm text-slate-500">Invite-only access for verified wardens</p>
-        </div>
+    <div className="space-y-5">
+      <div>
+        <h2 className="text-2xl font-semibold text-slate-900">Sign in</h2>
+        <p className="text-sm text-slate-500">Invite-only access for verified wardens</p>
       </div>
-      <div className="mt-6 flex gap-2">
+      <div className="flex gap-2">
         <button
           onClick={() => setMode('email')}
           className={`rounded-full px-4 py-2 text-sm ${
             mode === 'email'
-              ? 'bg-accent-500 text-white'
+              ? 'brand-button text-white'
               : 'border border-slate-200 text-slate-500'
           }`}
         >
@@ -53,14 +51,14 @@ const Login = () => {
           onClick={() => setMode('service')}
           className={`rounded-full px-4 py-2 text-sm ${
             mode === 'service'
-              ? 'bg-accent-500 text-white'
+              ? 'brand-button text-white'
               : 'border border-slate-200 text-slate-500'
           }`}
         >
           Service ID + CNIC
         </button>
       </div>
-      <form className="mt-6 space-y-4 animate-rise" onSubmit={handleSubmit}>
+      <form className="space-y-4" onSubmit={handleSubmit}>
         {mode === 'email' ? (
           <div>
             <label className="text-xs uppercase tracking-widest text-slate-400">Official Email</label>
@@ -68,7 +66,7 @@ const Login = () => {
               type="email"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm"
+              className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm"
               placeholder="warden@punjabpolice.gov.pk"
               required
             />
@@ -80,7 +78,7 @@ const Login = () => {
               <input
                 value={form.serviceId}
                 onChange={(e) => setForm({ ...form, serviceId: e.target.value })}
-                className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm"
+                className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm"
                 placeholder="PTW-00123"
                 required
               />
@@ -90,7 +88,7 @@ const Login = () => {
               <input
                 value={form.cnic}
                 onChange={(e) => setForm({ ...form, cnic: e.target.value })}
-                className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm"
+                className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm"
                 placeholder="12345-6789012-3"
                 required
               />
@@ -99,13 +97,13 @@ const Login = () => {
         )}
         {error ? <p className="text-sm text-red-500">{error}</p> : null}
         <button className="brand-button w-full rounded-2xl px-4 py-3 text-sm font-semibold text-white">
-          Continue
+          Log in
         </button>
-        <div className="flex items-center justify-between text-xs text-slate-500">
-          <span>Accounts require admin approval.</span>
+        <div className="flex flex-col gap-3 border-t border-slate-200 pt-4">
+          <span className="text-xs text-slate-500">Accounts require admin approval.</span>
           <Link
             to="/request-access"
-            className="brand-pill rounded-full px-3 py-1 font-semibold"
+            className="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700"
           >
             Create account (invite only)
           </Link>

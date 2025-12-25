@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+ï»¿import React, { useEffect, useMemo, useState } from 'react';
 import api from '../services/api.js';
 
 const Admin = () => {
@@ -275,7 +275,7 @@ const Admin = () => {
               <div>
                 <p className="font-semibold">{user.fullName}</p>
                 <p className="text-xs text-slate-500">
-                  {user.serviceId} • {user.city}
+                  {user.serviceId} | {user.city}
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -331,3 +331,4 @@ const Admin = () => {
 };
 
 export default Admin;
+

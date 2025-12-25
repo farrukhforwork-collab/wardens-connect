@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Role = require('../models/Role');
+const Post = require('../models/Post');
 const { hashSensitive } = require('../utils/crypto');
 const { recordAudit } = require('../services/auditService');
 
@@ -111,7 +112,7 @@ const blockUser = async (req, res, next) => {
 
 const updateMe = async (req, res, next) => {
   try {
-    const allowed = ['fullName', 'station', 'city', 'phone', 'avatarUrl'];
+    const allowed = ['fullName', 'station', 'city', 'phone', 'avatarUrl', 'coverUrl'];
     const updates = {};
     allowed.forEach((field) => {
       if (req.body[field] !== undefined) updates[field] = req.body[field];
@@ -130,6 +131,17 @@ const updateMe = async (req, res, next) => {
   }
 };
 
+const getProfile = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id).populate('role');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    const posts = await Post.find({ author: user.id }).sort({ createdAt: -1 }).limit(50);
+    res.json({ user, posts });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createUser,
   listPending,
@@ -137,5 +149,6 @@ module.exports = {
   listUsers,
   updateUserRole,
   blockUser,
-  updateMe
+  updateMe,
+  getProfile
 };

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+﻿import React, { useEffect, useMemo, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useTheme } from '../context/ThemeContext.jsx';
@@ -9,6 +9,7 @@ const navItems = [
   { label: 'Chat', to: '/chat' },
   { label: 'Pages', to: '/pages' },
   { label: 'Welfare', to: '/welfare' },
+  { label: 'Profile', to: '/profile' },
   { label: 'Admin', to: '/admin' }
 ];
 
@@ -30,7 +31,11 @@ const AppLayout = ({ children }) => {
   });
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
-  const isAdmin =\n    user?.isSuperAdmin || user?.role?.name === 'Admin' || user?.role?.name === 'Super Admin';\n  const visibleNavItems = isAdmin\n    ? navItems\n    : navItems.filter((item) => item.to !== '/admin');
+  const isAdmin =
+    user?.isSuperAdmin || user?.role?.name === 'Admin' || user?.role?.name === 'Super Admin';
+  const visibleNavItems = isAdmin
+    ? navItems
+    : navItems.filter((item) => item.to !== '/admin');
 
   const initials = useMemo(() => {
     if (!user?.fullName) return 'WC';
@@ -124,31 +129,52 @@ const AppLayout = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-950">
-      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-3 sm:flex-nowrap">
-          <Link to="/" className="flex items-center gap-3">
-            <img src="/wc-logo.svg" alt="Wardens Connect" className="h-10 w-10" />
-            <div>
-              <p className="font-display text-base leading-none sm:text-lg">Wardens Connect</p>
-              <p className="hidden text-[11px] uppercase tracking-[0.3em] text-slate-400 sm:block">
-                Private Network
+      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95">
+        <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2">
+          <Link to="/" className="flex items-center gap-2">
+            <img src="/wc-logo.svg" alt="Wardens Connect" className="h-9 w-9" />
+            <div className="hidden sm:block">
+              <p className="font-display text-sm uppercase tracking-[0.3em] text-slate-400">
+                Wardens Connect
               </p>
             </div>
           </Link>
           <div className="hidden flex-1 lg:block">
-            <div className="flex items-center rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex items-center rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-500">
               Search wardens, posts, pages
             </div>
           </div>
-          <div className="ml-auto flex items-center gap-3">
+          <div className="ml-auto flex items-center gap-2">
             <button
-              className="rounded-full border border-slate-200 px-3 py-1 text-sm dark:border-slate-700"
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200"
+              aria-label="Search"
             >
-              {theme === 'dark' ? 'Light' : 'Dark'}
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor">
+                <circle cx="11" cy="11" r="7" strokeWidth="2" />
+                <path d="M20 20l-3.5-3.5" strokeWidth="2" />
+              </svg>
             </button>
             <button
-              className="brand-button rounded-full px-3 py-1 text-sm font-medium text-white"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200"
+              aria-label="Notifications"
+            >
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor">
+                <path
+                  d="M6 9a6 6 0 1112 0c0 7 3 6 3 8H3c0-2 3-1 3-8z"
+                  strokeWidth="2"
+                />
+                <path d="M9 19a3 3 0 006 0" strokeWidth="2" />
+              </svg>
+            </button>
+            <button
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200"
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              aria-label="Toggle theme"
+            >
+              {theme === 'dark' ? 'L' : 'D'}
+            </button>
+            <button
+              className="brand-button hidden rounded-full px-3 py-1 text-sm font-medium text-white sm:inline-flex"
               onClick={logout}
             >
               Sign out
@@ -174,12 +200,11 @@ const AppLayout = ({ children }) => {
               )}
               <div>
                 <p className="text-sm font-semibold">{user?.fullName}</p>
-                <p className="text-xs text-slate-500">{user?.role?.name}</p>
+                <p className="text-xs text-slate-500">
+                  {(user?.rank || user?.role?.name || 'Warden') + ' | ' + (user?.station || 'HQ')}
+                </p>
+                <p className="text-[11px] text-slate-400">{user?.city || 'Punjab'}</p>
               </div>
-            </div>
-            <div className="mt-4 space-y-1 text-xs text-slate-500">
-              <p>Sector/Office: {user?.station || 'HQ'}</p>
-              <p>City: {user?.city || 'Punjab'}</p>
             </div>
           </div>
 
@@ -194,7 +219,7 @@ const AppLayout = ({ children }) => {
                     `rounded-xl px-3 py-2 text-sm font-medium transition ${
                       isActive
                         ? 'bg-accent-500/15 text-accent-600'
-                        : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
+                        : 'text-slate-600 hover:bg-slate-100'
                     }`
                   }
                 >
@@ -214,7 +239,7 @@ const AppLayout = ({ children }) => {
               <select
                 value={monthFilter}
                 onChange={(e) => setMonthFilter(e.target.value)}
-                className="rounded-full border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-600 dark:border-slate-800 dark:bg-slate-900"
+                className="rounded-full border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-600"
               >
                 <option value="">All</option>
                 {Array.from({ length: 6 }).map((_, index) => {
@@ -250,7 +275,7 @@ const AppLayout = ({ children }) => {
                 <select
                   value={noticeMonth}
                   onChange={(e) => setNoticeMonth(e.target.value)}
-                  className="rounded-full border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-600 dark:border-slate-800 dark:bg-slate-900"
+                  className="rounded-full border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-600"
                 >
                   <option value="">All</option>
                   {Array.from({ length: 6 }).map((_, index) => {
@@ -273,7 +298,7 @@ const AppLayout = ({ children }) => {
                 <select
                   value={noticeSort}
                   onChange={(e) => setNoticeSort(e.target.value)}
-                  className="rounded-full border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-600 dark:border-slate-800 dark:bg-slate-900"
+                  className="rounded-full border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-600"
                 >
                   <option value="newest">Newest</option>
                   <option value="oldest">Oldest</option>
@@ -297,15 +322,8 @@ const AppLayout = ({ children }) => {
                   </div>
                 ))
               ) : (
-                <p className="text-sm text-slate-600">
-                  No official notices yet.
-                </p>
+                <p className="text-sm text-slate-600">No official notices yet.</p>
               )}
-            </div>
-            <div className="mt-3 text-right">
-              <Link to="/" className="text-xs font-semibold text-accent-600">
-                View all
-              </Link>
             </div>
           </div>
         </aside>
@@ -364,9 +382,7 @@ const AppLayout = ({ children }) => {
                 </div>
               ))
             ) : (
-              <p className="text-sm text-slate-600">
-                No official notices yet.
-              </p>
+              <p className="text-sm text-slate-600">No official notices yet.</p>
             )}
           </div>
         </div>
@@ -386,16 +402,14 @@ const AppLayout = ({ children }) => {
         ) : null}
       </div>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white/95 px-4 py-2 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95 lg:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white/95 px-4 py-2 backdrop-blur lg:hidden">
         <div className="flex items-center justify-around text-xs">
           {visibleNavItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
-                isActive
-                  ? 'text-accent-600'
-                  : 'text-slate-500 dark:text-slate-400'
+                isActive ? 'text-accent-600' : 'text-slate-500'
               }
             >
               {item.label}
@@ -465,7 +479,7 @@ const AppLayout = ({ children }) => {
             <div className="mt-6 flex justify-end">
               <button
                 onClick={saveProfile}
-                className="rounded-full bg-accent-500 px-6 py-2 text-sm font-semibold text-white"
+                className="brand-button rounded-full px-6 py-2 text-sm font-semibold text-white"
               >
                 Save & Continue
               </button>

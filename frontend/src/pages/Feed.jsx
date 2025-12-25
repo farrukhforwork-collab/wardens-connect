@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import api from '../services/api.js';
 import { useAuth } from '../context/AuthContext.jsx';
 
@@ -76,7 +76,7 @@ const Feed = () => {
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            className="h-28 w-full rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm dark:border-slate-800 dark:bg-slate-950"
+            className="h-28 w-full rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm"
             placeholder="Write something for wardens..."
           />
           <div className="flex flex-wrap items-center gap-3">
@@ -84,7 +84,7 @@ const Feed = () => {
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               disabled={isOfficialNotice}
-              className="rounded-full border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-900"
+              className="rounded-full border border-slate-200 bg-white px-3 py-2 text-sm"
             >
               <option value="departmental">Departmental</option>
               <option value="personal">Personal</option>
@@ -102,7 +102,7 @@ const Feed = () => {
                 Official notice
               </label>
             ) : null}
-            <button className="rounded-full bg-accent-500 px-4 py-2 text-sm font-semibold text-white">
+            <button className="brand-button rounded-full px-4 py-2 text-sm font-semibold text-white">
               Publish
             </button>
           </div>
@@ -127,9 +127,9 @@ const Feed = () => {
                   <p className="text-sm font-semibold">{post.author?.fullName}</p>
                   <p className="text-xs text-slate-400">
                     {(post.author?.rank || post.author?.role?.name || 'Warden') +
-                      ' • ' +
+                      ' | ' +
                       (post.author?.station || 'HQ') +
-                      ' • ' +
+                      ' | ' +
                       (post.author?.city || 'Punjab')}
                   </p>
                   <p className="text-xs text-slate-500">{post.category}</p>
@@ -137,9 +137,7 @@ const Feed = () => {
               </div>
               <div className="flex flex-col items-end gap-2">
                 {post.isOfficialNotice ? (
-                  <span className="rounded-full bg-accent-500/15 px-2 py-1 text-xs text-accent-600">
-                    Official Notice
-                  </span>
+                  <span className="brand-pill rounded-full px-2 py-1 text-xs">Official Notice</span>
                 ) : null}
                 {post.isPinned ? (
                   <span className="rounded-full bg-slate-200 px-2 py-1 text-xs text-slate-500">
@@ -148,36 +146,61 @@ const Feed = () => {
                 ) : null}
               </div>
             </div>
-            <p className="mt-4 text-sm text-slate-700 dark:text-slate-300">{post.text}</p>
+            <p className="mt-4 text-sm text-slate-700">{post.text}</p>
+            {post.media?.length ? (
+              <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                {post.media.slice(0, 3).map((item) => (
+                  <div
+                    key={item.url}
+                    className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50"
+                  >
+                    {item.type === 'image' ? (
+                      <img src={item.url} alt={item.name || 'Media'} className="h-40 w-full object-cover" />
+                    ) : item.type === 'video' ? (
+                      <video src={item.url} controls className="h-40 w-full object-cover" />
+                    ) : (
+                      <a
+                        href={item.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex h-40 items-center justify-center text-xs text-slate-600"
+                      >
+                        View document
+                      </a>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : null}
             <div className="mt-4 flex gap-3 text-xs text-slate-500">
               <button
-                className="rounded-full border border-slate-200 px-3 py-1 dark:border-slate-700"
+                className="rounded-full border border-slate-200 px-3 py-1"
                 onClick={() => toggleLike(post._id)}
               >
                 Like ({post.likes?.length || 0})
               </button>
               <button
-                className="rounded-full border border-slate-200 px-3 py-1 dark:border-slate-700"
+                className="rounded-full border border-slate-200 px-3 py-1"
                 onClick={() => toggleComments(post._id)}
               >
                 Comment
               </button>
-              <button className="rounded-full border border-slate-200 px-3 py-1 dark:border-slate-700">
+              <button className="rounded-full border border-slate-200 px-3 py-1">
                 Share
               </button>
             </div>
             {openComments[post._id] && (
-              <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm dark:border-slate-800 dark:bg-slate-950">
+              <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm">
                 <form onSubmit={(event) => submitComment(event, post._id)} className="flex gap-2">
                   <input
                     value={commentDrafts[post._id] || ''}
                     onChange={(e) =>
                       setCommentDrafts((prev) => ({ ...prev, [post._id]: e.target.value }))
                     }
-                    className="flex-1 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs dark:border-slate-800 dark:bg-slate-900"
+                    className="flex-1 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs"
                     placeholder="Write a comment..."
                   />
-                  <button className="rounded-full bg-accent-500 px-4 py-2 text-xs font-semibold text-white">
+                  <button className="brand-button rounded-full px-4 py-2 text-xs font-semibold text-white">
                     Post
                   </button>
                 </form>
@@ -199,3 +222,4 @@ const Feed = () => {
 };
 
 export default Feed;
+
