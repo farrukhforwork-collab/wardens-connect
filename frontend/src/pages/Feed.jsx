@@ -229,18 +229,22 @@ const Feed = () => {
                 {post.media.slice(0, 3).map((item) => (
                   <div
                     key={item.url}
-                    className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50"
+                    className="aspect-[4/3] overflow-hidden rounded-2xl border border-slate-200 bg-slate-50"
                   >
                     {item.type === 'image' ? (
-                      <img src={item.url} alt={item.name || 'Media'} className="h-40 w-full object-cover" />
+                      <img
+                        src={item.url}
+                        alt={item.name || 'Media'}
+                        className="h-full w-full object-cover"
+                      />
                     ) : item.type === 'video' ? (
-                      <video src={item.url} controls className="h-40 w-full object-cover" />
+                      <video src={item.url} controls className="h-full w-full object-cover" />
                     ) : (
                       <a
                         href={item.url}
                         target="_blank"
                         rel="noreferrer"
-                        className="flex h-40 items-center justify-center text-xs text-slate-600"
+                        className="flex h-full items-center justify-center text-xs text-slate-600"
                       >
                         View document
                       </a>
