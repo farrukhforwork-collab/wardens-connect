@@ -1,0 +1,253 @@
+import React, { useEffect, useMemo, useState } from 'react';
+import api from '../services/api.js';
+
+const Admin = () => {
+  const [pending, setPending] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [reports, setReports] = useState([]);
+  const [search, setSearch] = useState('');
+  const [stationFilter, setStationFilter] = useState('');
+  const [cityFilter, setCityFilter] = useState('');
+  const [createForm, setCreateForm] = useState({
+    fullName: '',
+    email: '',
+    serviceId: '',
+    cnic: '',
+    roleName: 'Warden',
+    station: '',
+    city: '',
+    phone: ''
+  });
+  const [pendingRoles, setPendingRoles] = useState({});
+
+  const loadData = async () => {
+    const [pendingRes, reportsRes] = await Promise.all([
+      api.get('/users/pending'),
+      api.get('/reports')
+    ]);
+    setPending(pendingRes.data.users || []);
+    setReports(reportsRes.data.reports || []);
+    const usersRes = await api.get('/users');
+    setUsers(usersRes.data.users || []);
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const approveUser = async (id) => {
+    await api.patch(`/users/${id}/approve`);
+    const roleName = pendingRoles[id];
+    if (roleName) {
+      await api.patch(`/users/${id}/role`, { roleName });
+    }
+    loadData();
+  };
+
+  const blockUser = async (id) => {
+    await api.patch(`/users/${id}/block`);
+    loadData();
+  };
+
+  const createUser = async (event) => {
+    event.preventDefault();
+    await api.post('/users', createForm);
+    setCreateForm({
+      fullName: '',
+      email: '',
+      serviceId: '',
+      cnic: '',
+      roleName: 'Warden',
+      station: '',
+      city: '',
+      phone: ''
+    });
+    loadData();
+  };
+
+  const filteredPending = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    return pending.filter((user) => {
+      const matchesQuery =
+        !query ||
+        user.fullName?.toLowerCase().includes(query) ||
+        user.email?.toLowerCase().includes(query) ||
+        user.serviceId?.toLowerCase().includes(query);
+      const matchesStation = !stationFilter || user.station === stationFilter;
+      const matchesCity = !cityFilter || user.city === cityFilter;
+      return matchesQuery && matchesStation && matchesCity;
+    });
+  }, [pending, search, stationFilter, cityFilter]);
+
+  const stationOptions = useMemo(
+    () => Array.from(new Set(users.map((user) => user.station).filter(Boolean))).sort(),
+    [users]
+  );
+  const cityOptions = useMemo(
+    () => Array.from(new Set(users.map((user) => user.city).filter(Boolean))).sort(),
+    [users]
+  );
+
+  return (
+    <div className="space-y-6">
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+        <h2 className="font-display text-lg">Create User (Invite)</h2>
+        <form onSubmit={createUser} className="mt-4 grid gap-3 md:grid-cols-3">
+          <input
+            value={createForm.fullName}
+            onChange={(e) => setCreateForm({ ...createForm, fullName: e.target.value })}
+            className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950"
+            placeholder="Full name"
+            required
+          />
+          <input
+            value={createForm.email}
+            onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
+            className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950"
+            placeholder="Official email"
+          />
+          <input
+            value={createForm.serviceId}
+            onChange={(e) => setCreateForm({ ...createForm, serviceId: e.target.value })}
+            className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950"
+            placeholder="Service ID"
+          />
+          <input
+            value={createForm.cnic}
+            onChange={(e) => setCreateForm({ ...createForm, cnic: e.target.value })}
+            className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950"
+            placeholder="CNIC"
+          />
+          <select
+            value={createForm.roleName}
+            onChange={(e) => setCreateForm({ ...createForm, roleName: e.target.value })}
+            className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-900"
+          >
+            <option>Warden</option>
+            <option>Moderator</option>
+            <option>Admin</option>
+            <option>Super Admin</option>
+          </select>
+          <input
+            value={createForm.station}
+            onChange={(e) => setCreateForm({ ...createForm, station: e.target.value })}
+            className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950"
+            placeholder="Sector/Office"
+          />
+          <input
+            value={createForm.city}
+            onChange={(e) => setCreateForm({ ...createForm, city: e.target.value })}
+            className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950"
+            placeholder="City"
+          />
+          <input
+            value={createForm.phone}
+            onChange={(e) => setCreateForm({ ...createForm, phone: e.target.value })}
+            className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950"
+            placeholder="Phone"
+          />
+          <button className="rounded-full bg-accent-500 px-4 py-2 text-sm font-semibold text-white md:col-span-3">
+            Create Invite
+          </button>
+        </form>
+      </section>
+
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+        <h2 className="font-display text-lg">Pending Approvals</h2>
+        <div className="mt-4 grid gap-3 md:grid-cols-3">
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950"
+            placeholder="Search name, email, service ID"
+          />
+          <select
+            value={stationFilter}
+            onChange={(e) => setStationFilter(e.target.value)}
+            className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-900"
+          >
+            <option value="">All sectors/offices</option>
+            {stationOptions.map((station) => (
+              <option key={station} value={station}>
+                {station}
+              </option>
+            ))}
+          </select>
+          <select
+            value={cityFilter}
+            onChange={(e) => setCityFilter(e.target.value)}
+            className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-900"
+          >
+            <option value="">All cities</option>
+            {cityOptions.map((city) => (
+              <option key={city} value={city}>
+                {city}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="mt-4 space-y-3">
+          {filteredPending.map((user) => (
+            <div
+              key={user._id}
+              className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 p-4 text-sm dark:border-slate-800 dark:bg-slate-950"
+            >
+              <div>
+                <p className="font-semibold">{user.fullName}</p>
+                <p className="text-xs text-slate-500">
+                  {user.serviceId} • {user.city}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <select
+                  value={pendingRoles[user._id] || user.role?.name || 'Warden'}
+                  onChange={(e) =>
+                    setPendingRoles((prev) => ({ ...prev, [user._id]: e.target.value }))
+                  }
+                  className="rounded-full border border-slate-200 bg-white px-2 py-1 text-xs dark:border-slate-700 dark:bg-slate-900"
+                >
+                  <option>Warden</option>
+                  <option>Moderator</option>
+                  <option>Admin</option>
+                  <option>Super Admin</option>
+                </select>
+                <button
+                  onClick={() => approveUser(user._id)}
+                  className="rounded-full bg-accent-500 px-3 py-1 text-xs font-semibold text-white"
+                >
+                  Approve
+                </button>
+                <button
+                  onClick={() => blockUser(user._id)}
+                  className="rounded-full border border-red-300 px-3 py-1 text-xs font-semibold text-red-500"
+                >
+                  Block
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+        <h2 className="font-display text-lg">Reported Content</h2>
+        <div className="mt-4 space-y-3">
+          {reports.map((report) => (
+            <div
+              key={report._id}
+              className="rounded-2xl border border-slate-100 bg-slate-50 p-4 text-sm dark:border-slate-800 dark:bg-slate-950"
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-semibold">{report.type}</span>
+                <span className="text-xs text-slate-400">{report.status}</span>
+              </div>
+              <p className="text-xs text-slate-500">Reason: {report.reason}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default Admin;
