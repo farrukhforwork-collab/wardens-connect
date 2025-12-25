@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 
 const Login = () => {
@@ -101,9 +101,12 @@ const Login = () => {
         <button className="w-full rounded-2xl bg-accent-500 px-4 py-3 text-sm font-semibold text-white">
           Continue
         </button>
-        <p className="text-xs text-slate-500">
-          Accounts require admin approval. No public registration.
-        </p>
+        <div className="flex items-center justify-between text-xs text-slate-500">
+          <span>Accounts require admin approval.</span>
+          <Link to="/request-access" className="font-semibold text-accent-600">
+            Create account (invite only)
+          </Link>
+        </div>
       </form>
     </div>
   );

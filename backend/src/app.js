@@ -19,6 +19,7 @@ const notificationRoutes = require('./routes/notificationRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const inviteRoutes = require('./routes/inviteRoutes');
+const requestRoutes = require('./routes/requestRoutes');
 
 const app = express();
 
@@ -48,6 +49,7 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/uploads', uploadRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/invites', inviteRoutes);
+app.use('/api/requests', requestRoutes);
 
 app.use(errorHandler);
 

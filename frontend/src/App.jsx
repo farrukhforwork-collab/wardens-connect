@@ -10,6 +10,7 @@ import Pages from './pages/Pages.jsx';
 import Welfare from './pages/Welfare.jsx';
 import Admin from './pages/Admin.jsx';
 import InviteSignup from './pages/InviteSignup.jsx';
+import RequestAccess from './pages/RequestAccess.jsx';
 
 const App = () => (
   <Routes>
@@ -26,6 +27,14 @@ const App = () => (
       element={
         <AuthLayout>
           <InviteSignup />
+        </AuthLayout>
+      }
+    />
+    <Route
+      path="/request-access"
+      element={
+        <AuthLayout>
+          <RequestAccess />
         </AuthLayout>
       }
     />
