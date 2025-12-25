@@ -24,7 +24,17 @@ const requestRoutes = require('./routes/requestRoutes');
 const app = express();
 
 app.use(helmet());
-app.use(cors({ origin: env.clientUrl, credentials: true }));
+const allowedOrigins = new Set([env.clientUrl, ...env.clientUrls]);
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.has(origin)) return callback(null, true);
+      return callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true
+  })
+);
 app.use(express.json({ limit: '10mb' }));
 app.use(morgan('dev'));
 app.use(

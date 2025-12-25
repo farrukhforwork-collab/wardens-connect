@@ -9,6 +9,10 @@ const env = {
   jwtSecret: process.env.JWT_SECRET || 'change-me',
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '12h',
   clientUrl: process.env.CLIENT_URL || 'http://localhost:5173',
+  clientUrls: (process.env.CLIENT_URLS || '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean),
   storageProvider: process.env.STORAGE_PROVIDER || 's3',
   aws: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
