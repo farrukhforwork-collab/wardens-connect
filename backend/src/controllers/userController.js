@@ -6,6 +6,11 @@ const { recordAudit } = require('../services/auditService');
 const createUser = async (req, res, next) => {
   try {
     const { fullName, email, serviceId, cnic, roleName, station, city, phone } = req.body;
+    if (!email || !serviceId || !cnic) {
+      return res.status(400).json({
+        message: 'Email, Service ID, and CNIC are required for invites'
+      });
+    }
     const role = await Role.findOne({ name: roleName || 'Warden' });
     if (!role) return res.status(400).json({ message: 'Role not found' });
 

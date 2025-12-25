@@ -18,6 +18,15 @@ const Admin = () => {
     city: '',
     phone: ''
   });
+  const [createError, setCreateError] = useState('');
+  const [inviteForm, setInviteForm] = useState({
+    email: '',
+    serviceId: '',
+    roleName: 'Warden',
+    expiresInDays: 7
+  });
+  const [inviteLink, setInviteLink] = useState('');
+  const [inviteError, setInviteError] = useState('');
   const [pendingRoles, setPendingRoles] = useState({});
 
   const loadData = async () => {
@@ -51,18 +60,35 @@ const Admin = () => {
 
   const createUser = async (event) => {
     event.preventDefault();
-    await api.post('/users', createForm);
-    setCreateForm({
-      fullName: '',
-      email: '',
-      serviceId: '',
-      cnic: '',
-      roleName: 'Warden',
-      station: '',
-      city: '',
-      phone: ''
-    });
-    loadData();
+    setCreateError('');
+    try {
+      await api.post('/users', createForm);
+      setCreateForm({
+        fullName: '',
+        email: '',
+        serviceId: '',
+        cnic: '',
+        roleName: 'Warden',
+        station: '',
+        city: '',
+        phone: ''
+      });
+      loadData();
+    } catch (err) {
+      setCreateError(err?.response?.data?.message || 'Failed to create user');
+    }
+  };
+
+  const createInvite = async (event) => {
+    event.preventDefault();
+    setInviteError('');
+    setInviteLink('');
+    try {
+      const { data } = await api.post('/invites', inviteForm);
+      setInviteLink(data.link);
+    } catch (err) {
+      setInviteError(err?.response?.data?.message || 'Failed to create invite');
+    }
   };
 
   const filteredPending = useMemo(() => {
@@ -105,18 +131,22 @@ const Admin = () => {
             onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
             className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950"
             placeholder="Official email"
+            type="email"
+            required
           />
           <input
             value={createForm.serviceId}
             onChange={(e) => setCreateForm({ ...createForm, serviceId: e.target.value })}
             className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950"
             placeholder="Service ID"
+            required
           />
           <input
             value={createForm.cnic}
             onChange={(e) => setCreateForm({ ...createForm, cnic: e.target.value })}
             className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950"
             placeholder="CNIC"
+            required
           />
           <select
             value={createForm.roleName}
@@ -150,6 +180,56 @@ const Admin = () => {
             Create Invite
           </button>
         </form>
+        {createError ? <p className="mt-3 text-xs text-red-500">{createError}</p> : null}
+      </section>
+
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+        <h2 className="font-display text-lg">Generate Invite Link</h2>
+        <form onSubmit={createInvite} className="mt-4 grid gap-3 md:grid-cols-3">
+          <input
+            value={inviteForm.email}
+            onChange={(e) => setInviteForm({ ...inviteForm, email: e.target.value })}
+            className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950"
+            placeholder="Invite email"
+            type="email"
+            required
+          />
+          <input
+            value={inviteForm.serviceId}
+            onChange={(e) => setInviteForm({ ...inviteForm, serviceId: e.target.value })}
+            className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950"
+            placeholder="Service ID"
+            required
+          />
+          <select
+            value={inviteForm.roleName}
+            onChange={(e) => setInviteForm({ ...inviteForm, roleName: e.target.value })}
+            className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-900"
+          >
+            <option>Warden</option>
+            <option>Moderator</option>
+            <option>Admin</option>
+            <option>Super Admin</option>
+          </select>
+          <input
+            value={inviteForm.expiresInDays}
+            onChange={(e) => setInviteForm({ ...inviteForm, expiresInDays: e.target.value })}
+            className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950"
+            placeholder="Expires in days"
+            type="number"
+            min="1"
+          />
+          <button className="rounded-full bg-accent-500 px-4 py-2 text-sm font-semibold text-white md:col-span-2">
+            Generate Link
+          </button>
+        </form>
+        {inviteError ? <p className="mt-3 text-xs text-red-500">{inviteError}</p> : null}
+        {inviteLink ? (
+          <div className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 text-xs">
+            <p className="font-semibold">Invite Link</p>
+            <p className="break-all text-slate-600">{inviteLink}</p>
+          </div>
+        ) : null}
       </section>
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">

@@ -9,6 +9,7 @@ import Chat from './pages/Chat.jsx';
 import Pages from './pages/Pages.jsx';
 import Welfare from './pages/Welfare.jsx';
 import Admin from './pages/Admin.jsx';
+import InviteSignup from './pages/InviteSignup.jsx';
 
 const App = () => (
   <Routes>
@@ -17,6 +18,14 @@ const App = () => (
       element={
         <AuthLayout>
           <Login />
+        </AuthLayout>
+      }
+    />
+    <Route
+      path="/invite/:token"
+      element={
+        <AuthLayout>
+          <InviteSignup />
         </AuthLayout>
       }
     />
