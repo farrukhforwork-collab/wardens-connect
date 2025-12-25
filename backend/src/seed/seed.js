@@ -4,7 +4,7 @@ const Role = require('../models/Role');
 const User = require('../models/User');
 const { hashSensitive } = require('../utils/crypto');
 
-const seed = async () => {
+const runSeed = async () => {
   await mongoose.connect(env.mongoUri);
 
   await Role.deleteMany();
@@ -35,4 +35,8 @@ const seed = async () => {
   await mongoose.disconnect();
 };
 
-seed();
+if (require.main === module) {
+  runSeed();
+}
+
+module.exports = { runSeed };
