@@ -16,6 +16,7 @@ const Feed = () => {
   const [openComments, setOpenComments] = useState({});
   const [commentsByPost, setCommentsByPost] = useState({});
   const [commentDrafts, setCommentDrafts] = useState({});
+  const [activeMedia, setActiveMedia] = useState(null);
 
   const loadPosts = async () => {
     const { data } = await api.get('/posts');
@@ -227,8 +228,10 @@ const Feed = () => {
             {post.media?.length ? (
               <div className="mt-4 grid gap-2 sm:grid-cols-3">
                 {post.media.slice(0, 3).map((item) => (
-                  <div
+                  <button
                     key={item.url}
+                    type="button"
+                    onClick={() => setActiveMedia(item)}
                     className="aspect-[4/3] overflow-hidden rounded-2xl border border-slate-200 bg-slate-50"
                   >
                     {item.type === 'image' ? (
@@ -238,18 +241,18 @@ const Feed = () => {
                         className="h-full w-full object-cover"
                       />
                     ) : item.type === 'video' ? (
-                      <video src={item.url} controls className="h-full w-full object-cover" />
+                      <div className="relative h-full w-full">
+                        <video src={item.url} className="h-full w-full object-cover" muted />
+                        <span className="absolute inset-0 flex items-center justify-center text-xs font-semibold text-white">
+                          Play
+                        </span>
+                      </div>
                     ) : (
-                      <a
-                        href={item.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex h-full items-center justify-center text-xs text-slate-600"
-                      >
+                      <span className="flex h-full items-center justify-center text-xs text-slate-600">
                         View document
-                      </a>
+                      </span>
                     )}
-                  </div>
+                  </button>
                 ))}
               </div>
             ) : null}
@@ -301,6 +304,40 @@ const Feed = () => {
           <p className="text-sm text-slate-500">No posts found for this search.</p>
         )}
       </section>
+      {activeMedia ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4"
+          onClick={() => setActiveMedia(null)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="w-full max-w-3xl overflow-hidden rounded-3xl bg-black"
+            onClick={(event) => event.stopPropagation()}
+          >
+            {activeMedia.type === 'image' ? (
+              <img
+                src={activeMedia.url}
+                alt={activeMedia.name || 'Media'}
+                className="h-full w-full object-contain"
+              />
+            ) : activeMedia.type === 'video' ? (
+              <video
+                src={activeMedia.url}
+                controls
+                autoPlay
+                className="h-full w-full object-contain"
+              />
+            ) : (
+              <div className="flex items-center justify-center bg-white p-8 text-sm text-slate-700">
+                <a href={activeMedia.url} target="_blank" rel="noreferrer">
+                  Open document
+                </a>
+              </div>
+            )}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 };
