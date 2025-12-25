@@ -77,7 +77,7 @@ const Feed = () => {
       const city = post.author?.city || '';
       const category = post.category || '';
       const textValue = post.text || '';
-      const haystack = ${author}    .toLowerCase();
+      const haystack = `${author} ${station} ${city} ${category} ${textValue}`.toLowerCase();
       return haystack.includes(query);
     });
   }, [posts, query]);
